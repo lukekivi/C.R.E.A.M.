@@ -1,4 +1,4 @@
-package com.example.cream
+package com.lucaskivi.cream
 
 import org.junit.Test
 

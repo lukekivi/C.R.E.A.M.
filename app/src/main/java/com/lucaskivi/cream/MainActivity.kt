@@ -1,4 +1,4 @@
-package com.example.cream
+package com.lucaskivi.cream
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,21 +9,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.cream.ui.theme.CREAMTheme
+import com.lucaskivi.cream.data.di.AppContainerProvider
+import com.lucaskivi.cream.ui.LocalAppContainer
+import com.lucaskivi.cream.ui.theme.CREAMTheme
 
+/**
+ * Entry point activity. Hosts the root Compose content.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val appContainer = (applicationContext as AppContainerProvider).appContainer
         setContent {
-            CREAMTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            CompositionLocalProvider(LocalAppContainer provides appContainer) {
+                CREAMTheme {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        Greeting(
+                            name = "Android",
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
                 }
             }
         }

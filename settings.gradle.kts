@@ -24,4 +24,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "CREAM"
 include(":app")
+include(":data")
+include(":remote-datasource")
+include(":local-datasource")
  

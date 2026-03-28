@@ -1,4 +1,4 @@
-package com.example.cream.ui.theme
+package com.lucaskivi.cream.ui.theme
 
 import android.app.Activity
 import android.os.Build

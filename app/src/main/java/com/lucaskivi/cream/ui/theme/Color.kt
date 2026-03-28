@@ -1,4 +1,4 @@
-package com.example.cream.ui.theme
+package com.lucaskivi.cream.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

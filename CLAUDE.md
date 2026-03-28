@@ -8,6 +8,6 @@ Three-layer architecture with manual dependency injection (no Hilt/Koin — depe
 
 - **UI layer** (`ui/`): Jetpack Compose screens and state holders (ViewModels, remembered objects). Adaptive layouts via Compose.
 - **Data layer**: Repositories containing business logic. One repository per data type.
-- **Datasource layer**: Split into `remote-datasource` (network) and `local-datasource` (storage) modules. Repositories depend on datasources, not the other way around.
+- **Datasource layer**: Split into `remote-datasource` (network) and `local-datasource` (storage) modules. Each module owns its interface, implementation, and a factory function returning the interface type. Consumers call the factory — never import impl classes directly. `:data` depends on these modules; `:app` only depends on `:data`.
 
 Data flows up: Datasource → Repository → ViewModel → Composable.
