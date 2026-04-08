@@ -1,4 +1,4 @@
-package com.lucaskivi.cream.remote.transaction
+package com.lucaskivi.cream.transaction
 
 /**
  * Contract for remote transaction data operations.

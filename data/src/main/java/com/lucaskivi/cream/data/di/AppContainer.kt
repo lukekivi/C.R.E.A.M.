@@ -1,10 +1,13 @@
 package com.lucaskivi.cream.data.di
 
 import android.content.Context
-import com.lucaskivi.cream.data.transaction.TransactionRepository
-import com.lucaskivi.cream.data.transaction.TransactionRepositoryImpl
-import com.lucaskivi.cream.local.transactionLocalDataSource
-import com.lucaskivi.cream.remote.transactionRemoteDataSource
+import com.lucaskivi.cream.data.repository.auth.AuthRepository
+import com.lucaskivi.cream.data.repository.auth.AuthRepositoryImpl
+import com.lucaskivi.cream.data.repository.transaction.TransactionRepository
+import com.lucaskivi.cream.data.repository.transaction.TransactionRepositoryImpl
+import com.lucaskivi.cream.auth.authDataSource
+import com.lucaskivi.cream.transaction.transactionLocalDataSource
+import com.lucaskivi.cream.transaction.transactionRemoteDataSource
 
 /**
  * Manual dependency injection container for the app.
@@ -17,4 +20,6 @@ import com.lucaskivi.cream.remote.transactionRemoteDataSource
 class AppContainer(context: Context) {
     val transactionRepository: TransactionRepository =
         TransactionRepositoryImpl(transactionRemoteDataSource(), transactionLocalDataSource(context))
+    val authRepository: AuthRepository =
+        AuthRepositoryImpl(authDataSource())
 }

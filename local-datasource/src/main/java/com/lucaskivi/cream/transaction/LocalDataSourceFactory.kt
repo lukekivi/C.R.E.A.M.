@@ -1,8 +1,6 @@
-package com.lucaskivi.cream.local
+package com.lucaskivi.cream.transaction
 
 import android.content.Context
-import com.lucaskivi.cream.local.transaction.TransactionLocalDataSource
-import com.lucaskivi.cream.local.transaction.TransactionLocalDataSourceImpl
 
 /**
  * Creates the production [TransactionLocalDataSource] implementation.

@@ -19,4 +19,5 @@ android {
 dependencies {
     implementation(project(":remote-datasource"))
     implementation(project(":local-datasource"))
+    implementation(libs.kotlinx.coroutines.core)
 }

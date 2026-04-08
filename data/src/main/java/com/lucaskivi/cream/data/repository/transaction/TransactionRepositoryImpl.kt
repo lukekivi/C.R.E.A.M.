@@ -1,7 +1,7 @@
-package com.lucaskivi.cream.data.transaction
+package com.lucaskivi.cream.data.repository.transaction
 
-import com.lucaskivi.cream.local.transaction.TransactionLocalDataSource
-import com.lucaskivi.cream.remote.transaction.TransactionRemoteDataSource
+import com.lucaskivi.cream.transaction.TransactionLocalDataSource
+import com.lucaskivi.cream.transaction.TransactionRemoteDataSource
 
 /**
  * Production implementation of [TransactionRepository].

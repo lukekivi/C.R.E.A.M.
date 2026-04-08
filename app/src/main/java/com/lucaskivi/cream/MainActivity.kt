@@ -4,15 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.lucaskivi.cream.data.di.AppContainerProvider
+import com.lucaskivi.cream.screens.main.MainNavGraph
 import com.lucaskivi.cream.ui.LocalAppContainer
 import com.lucaskivi.cream.ui.theme.CREAMTheme
 
@@ -25,32 +19,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val appContainer = (applicationContext as AppContainerProvider).appContainer
         setContent {
-            CompositionLocalProvider(LocalAppContainer provides appContainer) {
-                CREAMTheme {
-                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        Greeting(
-                            name = "Android",
-                            modifier = Modifier.padding(innerPadding)
-                        )
-                    }
+            CREAMTheme {
+                CompositionLocalProvider(LocalAppContainer provides appContainer) {
+                    MainNavGraph()
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CREAMTheme {
-        Greeting("Android")
     }
 }
