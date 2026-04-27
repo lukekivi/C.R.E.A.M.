@@ -29,9 +29,25 @@ class LoginViewModel(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
+    /**
+     * Mutable backing flow for [uiState].
+     */
     private val _uiState = MutableStateFlow(LoginUiState())
+
+    /**
+     * Observable UI state of the login screen.
+     */
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+    /**
+     * Attempts to sign in with [email] and [password], updating [uiState] with the result.
+     *
+     * Sets `isLoading` while the request is in flight and surfaces any failure message
+     * in `error` on completion.
+     *
+     * @param email Email address of an existing account.
+     * @param password Password for that account.
+     */
     fun signInWithEmail(
         email: String,
         password: String,
@@ -44,6 +60,15 @@ class LoginViewModel(
         }
     }
 
+    /**
+     * Initiates Google Sign-In, prompting the user to select a Google account and
+     * exchanging the resulting credential for an authenticated session.
+     *
+     * [uiState] reflects the in-flight request and surfaces any failure message
+     * from the credential picker or sign-in step.
+     *
+     * @param context Context used to launch the credential picker.
+     */
     fun signInWithGoogle(context: Context) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -67,11 +92,19 @@ class LoginViewModel(
         }
     }
 
+    /**
+     * Clears any error currently displayed in [uiState].
+     */
     fun clearError() = _uiState.update { it.copy(error = null) }
 
+    /**
+     * Factory entry points for [LoginViewModel].
+     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [LoginViewModel] from [appContainer].
+         *
+         * @param appContainer Source of the dependencies the ViewModel requires.
          */
         fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -89,5 +122,5 @@ class LoginViewModel(
  */
 data class LoginUiState(
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
 )

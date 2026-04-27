@@ -22,9 +22,25 @@ class RegisterViewModel(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
+    /**
+     * Mutable backing flow for [uiState].
+     */
     private val _uiState = MutableStateFlow(RegisterUiState())
+
+    /**
+     * Observable UI state of the registration screen.
+     */
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
+    /**
+     * Attempts to create a new account with [email] and [password], updating [uiState] with the result.
+     *
+     * Sets `isLoading` while the request is in flight and surfaces any failure message
+     * in `error` on completion.
+     *
+     * @param email Email address to register.
+     * @param password Password for the new account.
+     */
     fun createAccount(
         email: String,
         password: String,
@@ -37,9 +53,14 @@ class RegisterViewModel(
         }
     }
 
+    /**
+     * Factory entry points for [RegisterViewModel].
+     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [RegisterViewModel] from [appContainer].
+         *
+         * @param appContainer Source of the dependencies the ViewModel requires.
          */
         fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -57,5 +78,5 @@ class RegisterViewModel(
  */
 data class RegisterUiState(
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
 )

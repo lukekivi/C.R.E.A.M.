@@ -11,3 +11,7 @@ Three-layer architecture with manual dependency injection (no Hilt/Koin — depe
 - **Datasource layer**: Split into `remote-datasource` (network) and `local-datasource` (storage) modules. Each module owns its interface, implementation, and a factory function returning the interface type. Consumers call the factory — never import impl classes directly. `:data` depends on these modules; `:app` only depends on `:data`.
 
 Data flows up: Datasource → Repository → ViewModel → Composable.
+
+## Code style
+
+See [STYLE.md](STYLE.md) for code conventions (documentation, formatting, module boundaries). Follow it for every change.

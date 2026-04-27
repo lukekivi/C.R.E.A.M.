@@ -23,7 +23,14 @@ class MainViewModel(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
+    /**
+     * Mutable backing flow for [uiState].
+     */
     private val _uiState = MutableStateFlow(MainUiState())
+
+    /**
+     * Observable auth state for the root navigation graph.
+     */
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     init {
@@ -39,9 +46,14 @@ class MainViewModel(
         }
     }
 
+    /**
+     * Factory entry points for [MainViewModel].
+     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [MainViewModel] from [appContainer].
+         *
+         * @param appContainer Source of the dependencies the ViewModel requires.
          */
         fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -54,10 +66,10 @@ class MainViewModel(
 /**
  * UI state for the root auth observer.
  *
- * @property isInitialized Whether the initial auth state has been received from Firebase.
+ * @property isInitialized Whether the initial auth state has been received.
  * @property isAuthenticated Whether a user is currently signed in.
  */
 data class MainUiState(
     val isInitialized: Boolean = false,
-    val isAuthenticated: Boolean = false
+    val isAuthenticated: Boolean = false,
 )

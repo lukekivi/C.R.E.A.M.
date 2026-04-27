@@ -1,6 +1,9 @@
 # C.R.E.A.M.
 A budget app, because cash rules everything around me.
 
+## Contributing
+See [STYLE.md](STYLE.md) for code conventions (documentation, formatting, module boundaries). All contributions follow it.
+
 ## Architecture
 
 ### Layering

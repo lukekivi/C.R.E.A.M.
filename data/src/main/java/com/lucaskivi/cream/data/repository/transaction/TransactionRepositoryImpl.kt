@@ -11,5 +11,5 @@ import com.lucaskivi.cream.transaction.TransactionRemoteDataSource
  */
 class TransactionRepositoryImpl(
     private val remoteDataSource: TransactionRemoteDataSource,
-    private val localDataSource: TransactionLocalDataSource
+    private val localDataSource: TransactionLocalDataSource,
 ) : TransactionRepository

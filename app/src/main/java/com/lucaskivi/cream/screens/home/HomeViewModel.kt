@@ -14,11 +14,19 @@ class HomeViewModel(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
+    /**
+     * Signs the current user out, clearing the active session.
+     */
     fun signOut() = authRepository.signOut()
 
+    /**
+     * Factory entry points for [HomeViewModel].
+     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [HomeViewModel] from [appContainer].
+         *
+         * @param appContainer Source of the dependencies the ViewModel requires.
          */
         fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")

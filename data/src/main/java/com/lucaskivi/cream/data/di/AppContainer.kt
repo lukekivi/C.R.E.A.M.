@@ -18,8 +18,15 @@ import com.lucaskivi.cream.transaction.transactionRemoteDataSource
  * @param context Application context passed to datasources that require it.
  */
 class AppContainer(context: Context) {
+    /**
+     * Singleton [TransactionRepository] for the app.
+     */
     val transactionRepository: TransactionRepository =
         TransactionRepositoryImpl(transactionRemoteDataSource(), transactionLocalDataSource(context))
+
+    /**
+     * Singleton [AuthRepository] for the app.
+     */
     val authRepository: AuthRepository =
         AuthRepositoryImpl(authDataSource())
 }
