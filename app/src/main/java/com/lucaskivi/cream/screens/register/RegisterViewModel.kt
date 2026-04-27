@@ -3,6 +3,8 @@ package com.lucaskivi.cream.screens.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.lucaskivi.cream.core.onFailure
+import com.lucaskivi.cream.core.onSuccess
 import com.lucaskivi.cream.data.repository.auth.AuthRepository
 import com.lucaskivi.cream.data.di.AppContainer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +33,7 @@ class RegisterViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
             authRepository.createUserWithEmail(email, password)
                 .onSuccess { _uiState.update { it.copy(isLoading = false) } }
-                .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
+                .onFailure { cause -> _uiState.update { it.copy(isLoading = false, error = cause.message) } }
         }
     }
 

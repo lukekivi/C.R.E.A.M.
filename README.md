@@ -30,13 +30,14 @@ Each datasource module owns its interface, implementation, and a factory functio
 :data                — repositories, domain models, AppContainer (wires datasource impls)
 :remote-datasource   — RemoteDataSource interface + implementation
 :local-datasource    — LocalDataSource interface + implementation
+:core                — primitives shared across modules (e.g. NetworkResult)
 ```
 
 Dependency graph:
 ```
 :app → :data
-:data → :remote-datasource, :local-datasource
-:remote-datasource → (no module deps)
+:data → :remote-datasource, :local-datasource, :core
+:remote-datasource → :core
 :local-datasource  → (no module deps)
 ```
 

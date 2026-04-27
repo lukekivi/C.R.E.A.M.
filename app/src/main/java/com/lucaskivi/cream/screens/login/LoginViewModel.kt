@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.lucaskivi.cream.R
+import com.lucaskivi.cream.core.onFailure
+import com.lucaskivi.cream.core.onSuccess
 import com.lucaskivi.cream.data.repository.auth.AuthRepository
 import com.lucaskivi.cream.data.di.AppContainer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +40,7 @@ class LoginViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
             authRepository.signInWithEmail(email, password)
                 .onSuccess { _uiState.update { it.copy(isLoading = false) } }
-                .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
+                .onFailure { cause -> _uiState.update { it.copy(isLoading = false, error = cause.message) } }
         }
     }
 
@@ -58,7 +60,7 @@ class LoginViewModel(
                 val idToken = GoogleIdTokenCredential.createFrom(result.credential.data).idToken
                 authRepository.signInWithGoogle(idToken)
                     .onSuccess { _uiState.update { it.copy(isLoading = false) } }
-                    .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
+                    .onFailure { cause -> _uiState.update { it.copy(isLoading = false, error = cause.message) } }
             } catch (e: GetCredentialException) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

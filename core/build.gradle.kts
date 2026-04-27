@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.lucaskivi.cream.data"
+    namespace = "com.lucaskivi.cream.core"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -14,11 +14,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-}
-
-dependencies {
-    api(project(":core"))
-    implementation(project(":remote-datasource"))
-    implementation(project(":local-datasource"))
-    implementation(libs.kotlinx.coroutines.core)
 }
