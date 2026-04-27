@@ -95,7 +95,8 @@ class LoginViewModel(
     /**
      * Clears any error currently displayed in [uiState].
      */
-    fun clearError() = mutableUiState.update { it.copy(error = null) }
+    fun clearError() =
+        mutableUiState.update { it.copy(error = null) }
 
     /**
      * Factory entry points for [LoginViewModel].

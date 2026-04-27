@@ -17,7 +17,8 @@ class HomeViewModel(
     /**
      * Signs the current user out, clearing the active session.
      */
-    fun signOut() = authRepository.signOut()
+    fun signOut() =
+        authRepository.signOut()
 
     /**
      * Factory entry points for [HomeViewModel].

@@ -96,6 +96,36 @@ fun signInWithEmail(
 
 This applies to interfaces, abstract declarations, overrides, and concrete implementations alike.
 
+## Expression-body functions
+
+When a function uses `=` to specify an expression body, place the body expression on a new line, indented under the function header. Do not write `=` and the body on the same line.
+
+```kotlin
+fun <T : ViewModel> create(modelClass: Class<T>): T =
+    LoginViewModel(appContainer.authRepository) as T
+```
+
+This minimizes diff churn if the body later needs to grow into a block body — only the header line changes (`=` → `{`) and a closing `}` is added; the body line stays put.
+
+## Method chains
+
+When chaining method calls (`.foo().bar().baz()`), keep the receiver and its first call together, then break each subsequent chained call onto its own line, indented one level deeper.
+
+```kotlin
+authRepository.signInWithEmail(email, password)
+    .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
+    .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
+```
+
+Single-call chains (`foo.bar()`) stay on one line. Builder-style chains follow the same rule:
+
+```kotlin
+GetGoogleIdOption.Builder()
+    .setFilterByAuthorizedAccounts(false)
+    .setServerClientId(serverClientId)
+    .build()
+```
+
 ## ViewModel formatting
 
 Every ViewModel primary constructor uses the per-line / trailing-comma format above, even for a single parameter:

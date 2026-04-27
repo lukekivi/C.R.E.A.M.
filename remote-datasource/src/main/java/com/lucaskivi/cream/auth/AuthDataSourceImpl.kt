@@ -29,7 +29,8 @@ class AuthDataSourceImpl private constructor(
         /**
          * Creates an [AuthDataSourceImpl] backed by the default [FirebaseAuth] instance.
          */
-        fun create(): AuthDataSourceImpl = AuthDataSourceImpl(FirebaseAuth.getInstance())
+        fun create(): AuthDataSourceImpl =
+            AuthDataSourceImpl(FirebaseAuth.getInstance())
     }
 
     override val currentUser: User?
@@ -46,32 +47,46 @@ class AuthDataSourceImpl private constructor(
     override suspend fun signInWithEmail(
         email: String,
         password: String,
-    ): NetworkResult<User> = catching {
-        firebaseAuth.signInWithEmailAndPassword(email, password).await().user!!.toDomainUser()
-    }
+    ): NetworkResult<User> =
+        catching {
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                .await()
+                .user!!
+                .toDomainUser()
+        }
 
     override suspend fun createUserWithEmail(
         email: String,
         password: String,
-    ): NetworkResult<User> = catching {
-        firebaseAuth.createUserWithEmailAndPassword(email, password).await().user!!.toDomainUser()
-    }
+    ): NetworkResult<User> =
+        catching {
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .await()
+                .user!!
+                .toDomainUser()
+        }
 
-    override suspend fun signInWithGoogle(idToken: String): NetworkResult<User> = catching {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        firebaseAuth.signInWithCredential(credential).await().user!!.toDomainUser()
-    }
+    override suspend fun signInWithGoogle(idToken: String): NetworkResult<User> =
+        catching {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            firebaseAuth.signInWithCredential(credential)
+                .await()
+                .user!!
+                .toDomainUser()
+        }
 
-    override fun signOut() = firebaseAuth.signOut()
+    override fun signOut() =
+        firebaseAuth.signOut()
 
     /**
      * Maps a [FirebaseUser] into the cross-module [User] domain type.
      */
-    private fun FirebaseUser.toDomainUser() = User(
-        uid = uid,
-        email = email,
-        displayName = displayName,
-    )
+    private fun FirebaseUser.toDomainUser() =
+        User(
+            uid = uid,
+            email = email,
+            displayName = displayName,
+        )
 }
 
 /**
@@ -82,10 +97,11 @@ class AuthDataSourceImpl private constructor(
  * @param block Suspending operation whose result becomes [NetworkResult.Success].
  * @return [NetworkResult.Success] with the block's value, or [NetworkResult.Failure] on any other throwable.
  */
-private inline fun <T> catching(block: () -> T): NetworkResult<T> = try {
-    NetworkResult.Success(block())
-} catch (e: CancellationException) {
-    throw e
-} catch (e: Throwable) {
-    NetworkResult.Failure(e)
-}
+private inline fun <T> catching(block: () -> T): NetworkResult<T> =
+    try {
+        NetworkResult.Success(block())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Throwable) {
+        NetworkResult.Failure(e)
+    }

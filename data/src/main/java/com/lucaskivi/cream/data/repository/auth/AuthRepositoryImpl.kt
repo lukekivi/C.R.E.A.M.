@@ -26,24 +26,31 @@ class AuthRepositoryImpl(
     override suspend fun signInWithEmail(
         email: String,
         password: String,
-    ): NetworkResult<User> = authDataSource.signInWithEmail(email, password).map { it.toDomainUser() }
+    ): NetworkResult<User> =
+        authDataSource.signInWithEmail(email, password)
+            .map { it.toDomainUser() }
 
     override suspend fun createUserWithEmail(
         email: String,
         password: String,
-    ): NetworkResult<User> = authDataSource.createUserWithEmail(email, password).map { it.toDomainUser() }
+    ): NetworkResult<User> =
+        authDataSource.createUserWithEmail(email, password)
+            .map { it.toDomainUser() }
 
     override suspend fun signInWithGoogle(idToken: String): NetworkResult<User> =
-        authDataSource.signInWithGoogle(idToken).map { it.toDomainUser() }
+        authDataSource.signInWithGoogle(idToken)
+            .map { it.toDomainUser() }
 
-    override fun signOut() = authDataSource.signOut()
+    override fun signOut() =
+        authDataSource.signOut()
 }
 
 /**
  * Maps a datasource-layer [User][com.lucaskivi.cream.model.User] into the data-layer domain [User].
  */
-private fun com.lucaskivi.cream.model.User.toDomainUser() = User(
-    uid = uid,
-    email = email,
-    displayName = displayName,
-)
+private fun com.lucaskivi.cream.model.User.toDomainUser() =
+    User(
+        uid = uid,
+        email = email,
+        displayName = displayName,
+    )

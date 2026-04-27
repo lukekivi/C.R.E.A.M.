@@ -46,7 +46,8 @@ inline fun <T> NetworkResult<T>.onFailure(action: (Throwable) -> Unit): NetworkR
  * @param transform Mapping applied only when this is a [NetworkResult.Success].
  * @return A [NetworkResult] of the transformed type, preserving the original failure if any.
  */
-inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> = when (this) {
-    is NetworkResult.Success -> NetworkResult.Success(transform(value))
-    is NetworkResult.Failure -> this
-}
+inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
+    when (this) {
+        is NetworkResult.Success -> NetworkResult.Success(transform(value))
+        is NetworkResult.Failure -> this
+    }
