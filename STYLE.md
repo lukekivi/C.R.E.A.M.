@@ -51,6 +51,15 @@ val currentUser: User?
 
 Properties promoted from primary-constructor parameters (`class Foo(val bar: Bar)`) are documented via `@param`/`@property` on the class KDoc rather than a separate KDoc on the parameter.
 
+### Backing properties
+
+When a class exposes an immutable view of a mutable property, name the mutable holder `mutableX` and the public view `x`. Do not use the underscore-prefix idiom (`_x`).
+
+```kotlin
+private val mutableUiState = MutableStateFlow(LoginUiState())
+val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
+```
+
 ### Public vs. internal docs
 
 KDoc describes the **contract** — what a caller can rely on — not the implementation. Strongly avoid leaking implementation details into KDoc on public-facing declarations (anything visible outside its declaring file: `public`, `internal`, `protected`, and `private` declarations exposed via inline functions).

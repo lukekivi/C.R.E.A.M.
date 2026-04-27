@@ -25,12 +25,12 @@ class RegisterViewModel(
     /**
      * Mutable backing flow for [uiState].
      */
-    private val _uiState = MutableStateFlow(RegisterUiState())
+    private val mutableUiState = MutableStateFlow(RegisterUiState())
 
     /**
      * Observable UI state of the registration screen.
      */
-    val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<RegisterUiState> = mutableUiState.asStateFlow()
 
     /**
      * Attempts to create a new account with [email] and [password], updating [uiState] with the result.
@@ -46,10 +46,10 @@ class RegisterViewModel(
         password: String,
     ) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            mutableUiState.update { it.copy(isLoading = true, error = null) }
             authRepository.createUserWithEmail(email, password)
-                .onSuccess { _uiState.update { it.copy(isLoading = false) } }
-                .onFailure { cause -> _uiState.update { it.copy(isLoading = false, error = cause.message) } }
+                .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
+                .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
         }
     }
 

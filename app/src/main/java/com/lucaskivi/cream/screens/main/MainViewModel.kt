@@ -26,17 +26,17 @@ class MainViewModel(
     /**
      * Mutable backing flow for [uiState].
      */
-    private val _uiState = MutableStateFlow(MainUiState())
+    private val mutableUiState = MutableStateFlow(MainUiState())
 
     /**
      * Observable auth state for the root navigation graph.
      */
-    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<MainUiState> = mutableUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             authRepository.authStateFlow.collect { user ->
-                _uiState.update {
+                mutableUiState.update {
                     it.copy(
                         isInitialized = true,
                         isAuthenticated = user != null,

@@ -32,12 +32,12 @@ class LoginViewModel(
     /**
      * Mutable backing flow for [uiState].
      */
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val mutableUiState = MutableStateFlow(LoginUiState())
 
     /**
      * Observable UI state of the login screen.
      */
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<LoginUiState> = mutableUiState.asStateFlow()
 
     /**
      * Attempts to sign in with [email] and [password], updating [uiState] with the result.
@@ -53,10 +53,10 @@ class LoginViewModel(
         password: String,
     ) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            mutableUiState.update { it.copy(isLoading = true, error = null) }
             authRepository.signInWithEmail(email, password)
-                .onSuccess { _uiState.update { it.copy(isLoading = false) } }
-                .onFailure { cause -> _uiState.update { it.copy(isLoading = false, error = cause.message) } }
+                .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
+                .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
         }
     }
 
@@ -71,7 +71,7 @@ class LoginViewModel(
      */
     fun signInWithGoogle(context: Context) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            mutableUiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val credentialManager = CredentialManager.create(context)
                 val googleIdOption = GetGoogleIdOption.Builder()
@@ -84,10 +84,10 @@ class LoginViewModel(
                 val result = credentialManager.getCredential(context, request)
                 val idToken = GoogleIdTokenCredential.createFrom(result.credential.data).idToken
                 authRepository.signInWithGoogle(idToken)
-                    .onSuccess { _uiState.update { it.copy(isLoading = false) } }
-                    .onFailure { cause -> _uiState.update { it.copy(isLoading = false, error = cause.message) } }
+                    .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
+                    .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
             } catch (e: GetCredentialException) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                mutableUiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -95,7 +95,7 @@ class LoginViewModel(
     /**
      * Clears any error currently displayed in [uiState].
      */
-    fun clearError() = _uiState.update { it.copy(error = null) }
+    fun clearError() = mutableUiState.update { it.copy(error = null) }
 
     /**
      * Factory entry points for [LoginViewModel].
