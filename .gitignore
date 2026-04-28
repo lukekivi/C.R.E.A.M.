@@ -11,3 +11,8 @@
 local.properties
 .claude/conductors/
 .claude/plans/
+functions/node_modules/
+functions/lib/
+.firebase/
+firebase-debug.log
+firestore-debug.log

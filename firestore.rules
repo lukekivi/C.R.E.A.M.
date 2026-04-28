@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// All institution data lives under `users/{uid}/items/{itemId}`. Cloud
+// Functions (Admin SDK) read and write these docs; clients never do.
+// Default-deny everything from the client SDK so a callable bug cannot
+// leak Plaid access tokens to a signed-in user.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
