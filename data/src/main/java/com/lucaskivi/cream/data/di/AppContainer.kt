@@ -3,11 +3,11 @@ package com.lucaskivi.cream.data.di
 import android.content.Context
 import com.lucaskivi.cream.data.repository.auth.AuthRepository
 import com.lucaskivi.cream.data.repository.auth.AuthRepositoryImpl
-import com.lucaskivi.cream.data.repository.transaction.TransactionRepository
-import com.lucaskivi.cream.data.repository.transaction.TransactionRepositoryImpl
+import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
+import com.lucaskivi.cream.data.repository.institution.InstitutionRepositoryImpl
 import com.lucaskivi.cream.auth.authDataSource
-import com.lucaskivi.cream.transaction.transactionLocalDataSource
-import com.lucaskivi.cream.transaction.transactionRemoteDataSource
+import com.lucaskivi.cream.institution.institutionLocalDataSource
+import com.lucaskivi.cream.institution.institutionRemoteDataSource
 
 /**
  * Manual dependency injection container for the app.
@@ -19,10 +19,10 @@ import com.lucaskivi.cream.transaction.transactionRemoteDataSource
  */
 class AppContainer(context: Context) {
     /**
-     * Singleton [TransactionRepository] for the app.
+     * Singleton [InstitutionRepository] for the app.
      */
-    val transactionRepository: TransactionRepository =
-        TransactionRepositoryImpl(transactionRemoteDataSource(), transactionLocalDataSource(context))
+    val institutionRepository: InstitutionRepository =
+        InstitutionRepositoryImpl(institutionRemoteDataSource(), institutionLocalDataSource(context))
 
     /**
      * Singleton [AuthRepository] for the app.
