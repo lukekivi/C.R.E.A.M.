@@ -10,7 +10,7 @@ Exceptions:
 - Local declarations inside a function body.
 - `override` members — they inherit KDoc from the supertype declaration. Only add KDoc on an override if its behavior diverges from the parent contract in a way the caller needs to know.
 
-KDoc is always **multiline**, even for one-sentence comments. Never single-line (`/** Signs out. */`):
+KDoc is always **multiline**, even for one-sentence comments. Never use the single-line `/** ... */` form anywhere; where a multiline KDoc isn't wanted, a `//` comment is fine.
 
 ```kotlin
 /**
@@ -83,6 +83,8 @@ suspend fun signInWithEmail(...)
 
 For `private` declarations, still prefer behavior-first phrasing. Only mention implementation details when a maintainer would otherwise be misled — e.g. a non-obvious invariant, a workaround for a specific bug, or a subtle ordering requirement. If you can delete the impl-detail sentence without making the code harder to maintain, delete it.
 
+**Vendor names in KDoc.** Don't name a vendor or backing technology (Plaid, Firebase, Room, Retrofit…) in KDoc for types that are meant to be vendor-neutral — e.g. domain models in `:core`. For tightly-coupled classes the coupling is explicit and intentional, so naming the vendor is fine.
+
 ## Function and constructor parameters
 
 When a function, constructor, or class declaration has 2+ parameters, put each on its own line with a trailing comma. The closing paren (and return type, if any) goes on its own line.
@@ -138,6 +140,10 @@ class FooViewModel(
 ```
 
 The `UiState` data class is defined **below** the ViewModel class, not above. The ViewModel is the primary declaration; UiState is a supporting type.
+
+## Packages
+
+Model types (data classes and enums that carry data between layers) live in a `model` subpackage of their feature package, e.g. `com.lucaskivi.cream.core.institution.model`. The feature package itself holds the behavior: interfaces, implementations, factories.
 
 ## Module / layer boundaries
 
