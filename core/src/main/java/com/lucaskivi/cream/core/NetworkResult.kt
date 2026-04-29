@@ -1,5 +1,7 @@
 package com.lucaskivi.cream.core
 
+import java.util.concurrent.CancellationException
+
 /**
  * Result of a network operation that can succeed with a value or fail with a cause.
  *
@@ -50,4 +52,22 @@ inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
     when (this) {
         is NetworkResult.Success -> NetworkResult.Success(transform(value))
         is NetworkResult.Failure -> this
+    }
+
+/**
+ * Runs [block] and wraps the result in [NetworkResult.Success], or catches any exception and
+ * wraps it in [NetworkResult.Failure].
+ *
+ * [CancellationException] is rethrown unchanged so structured-concurrency cancellation is
+ * never silently swallowed.
+ *
+ * @param block Operation whose result becomes [NetworkResult.Success].
+ */
+inline fun <T> catching(block: () -> T): NetworkResult<T> =
+    try {
+        NetworkResult.Success(block())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Throwable) {
+        NetworkResult.Failure(e)
     }

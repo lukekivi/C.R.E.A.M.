@@ -14,11 +14,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    testOptions {
+        unitTests.all { it.useJUnitPlatform() }
+    }
 }
 
 dependencies {
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
     api(project(":core"))
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.functions)
     implementation(libs.kotlinx.coroutines.play.services)
 }
