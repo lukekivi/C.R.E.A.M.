@@ -8,6 +8,7 @@ Every Kotlin declaration gets a KDoc comment — class, interface, object, funct
 
 Exceptions:
 - Local declarations inside a function body.
+- Test sources. Test classes, tests, and test helpers don't get KDoc.
 - `override` members — they inherit KDoc from the supertype declaration. Only add KDoc on an override if its behavior diverges from the parent contract in a way the caller needs to know.
 
 KDoc is always **multiline**, even for one-sentence comments. Never use the single-line `/** ... */` form anywhere; where a multiline KDoc isn't wanted, a `//` comment is fine.
@@ -98,6 +99,20 @@ fun signInWithEmail(
 
 This applies to interfaces, abstract declarations, overrides, and concrete implementations alike.
 
+### Multi-line arguments
+
+When an argument expression at a call site spans more than one line, extract it into a local `val` first and pass the `val`.
+
+```kotlin
+val request = mapOf(
+    "itemId" to itemId,
+    "cursor" to cursor,
+)
+val response = functions
+    .getHttpsCallable(SYNC_TRANSACTIONS)
+    .call(request)
+```
+
 ## Expression-body functions
 
 When a function uses `=` to specify an expression body, place the body expression on a new line, indented under the function header. Do not write `=` and the body on the same line.
@@ -145,6 +160,28 @@ The `UiState` data class is defined **below** the ViewModel class, not above. Th
 
 Model types (data classes and enums that carry data between layers) live in a `model` subpackage of their feature package, e.g. `com.lucaskivi.cream.core.institution.model`. The feature package itself holds the behavior: interfaces, implementations, factories.
 
+## Companion objects
+
+Companion objects are declared at the end of the class body, after all other members.
+
+## Tests
+
+Group a test class's tests by the method under test, each group in a JUnit 5 `@Nested inner class` named after that method. Test names then describe only the behavior. Don't use `// region` comments.
+
+```kotlin
+class InstitutionTransformerTest {
+
+    @Nested
+    inner class ToLinkToken {
+
+        @Test
+        fun `returns the link token`() {
+            ...
+        }
+    }
+}
+```
+
 ## Module / layer boundaries
 
 Each module owns its implementation behind a factory function that returns the interface type. Consumers call the factory; they never import the impl class directly.
@@ -155,3 +192,11 @@ fun authDataSource(): AuthDataSource = AuthDataSourceImpl.create()
 ```
 
 `AppContainer` in `:data` wires impls by calling each module's factory. `:app` depends only on `:data`.
+
+## Transformers
+
+When a datasource impl converts raw payloads (callable responses, API bodies) into models, that conversion lives in a `<Feature>Transformer` class in the same package, e.g. `InstitutionTransformer`. Keeping it out of the impl makes the mapping testable and lets impl tests mock it.
+
+- The transformer is an `internal` class injected through the impl's constructor; the module's factory passes the real one.
+- Impl tests mock the transformer. They verify what is sent to the backend, that the response is handed to the transformer, and that the transformer's result (or failure) is returned.
+- Helpers that aren't specific to one feature, such as casts, go in a neutral extensions file in the module (e.g. `com.lucaskivi.cream.remote.CastExtensions`), not in the transformer.

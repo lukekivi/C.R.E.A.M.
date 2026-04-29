@@ -2,6 +2,11 @@ plugins {
     alias(libs.plugins.android.library)
 }
 
+dependencies {
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
 android {
     namespace = "com.lucaskivi.cream.core"
     compileSdk {
@@ -13,5 +18,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    testOptions {
+        unitTests.all { it.useJUnitPlatform() }
     }
 }
