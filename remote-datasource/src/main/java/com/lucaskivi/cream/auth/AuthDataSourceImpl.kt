@@ -4,8 +4,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.lucaskivi.cream.core.NetworkResult
+import com.lucaskivi.cream.core.catching
 import com.lucaskivi.cream.model.User
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -89,19 +89,3 @@ class AuthDataSourceImpl private constructor(
         )
 }
 
-/**
- * Runs [block] and converts any thrown exception into [NetworkResult.Failure].
- *
- * [CancellationException] is rethrown so structured-concurrency cancellation is preserved.
- *
- * @param block Suspending operation whose result becomes [NetworkResult.Success].
- * @return [NetworkResult.Success] with the block's value, or [NetworkResult.Failure] on any other throwable.
- */
-private inline fun <T> catching(block: () -> T): NetworkResult<T> =
-    try {
-        NetworkResult.Success(block())
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Throwable) {
-        NetworkResult.Failure(e)
-    }
