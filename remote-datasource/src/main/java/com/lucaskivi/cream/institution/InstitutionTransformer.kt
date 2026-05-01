@@ -3,8 +3,8 @@ package com.lucaskivi.cream.institution
 import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.FinancialAccountType
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
+import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.core.institution.model.Transaction
-import com.lucaskivi.cream.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.institution.model.TransactionDelta
 import com.lucaskivi.cream.remote.asMap
 import com.lucaskivi.cream.remote.asMapList
