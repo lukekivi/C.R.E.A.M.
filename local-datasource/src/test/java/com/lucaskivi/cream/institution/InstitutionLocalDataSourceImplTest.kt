@@ -4,6 +4,7 @@ import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.core.institution.model.Transaction
+import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
@@ -74,13 +75,38 @@ class InstitutionLocalDataSourceImplTest {
     inner class UpsertInstitutions {
 
         @Test
-        fun `upserts the transformed institutions`() = runTest {
-            val domain: LinkedInstitution = mockk()
+        fun `inserts the transformed institutions if absent`() = runTest {
+            val domain = LinkedInstitution(
+                itemId = "item1",
+                institutionId = "ins_3",
+                institutionName = "Chase",
+            )
             val entity: LinkedInstitutionEntity = mockk()
             every { transformer.toLinkedInstitutionEntity(domain) } returns entity
-            coJustRun { dao.upsertInstitutions(any()) }
+            coJustRun { dao.insertInstitutionsIfAbsent(any()) }
+            coJustRun { dao.updateInstitutionInfo(any(), any(), any()) }
             dataSource.upsertInstitutions(listOf(domain))
-            coVerify { dao.upsertInstitutions(listOf(entity)) }
+            coVerify { dao.insertInstitutionsIfAbsent(listOf(entity)) }
+        }
+
+        @Test
+        fun `updates each institution's info`() = runTest {
+            val domain = LinkedInstitution(
+                itemId = "item1",
+                institutionId = "ins_3",
+                institutionName = "Chase",
+            )
+            every { transformer.toLinkedInstitutionEntity(domain) } returns mockk()
+            coJustRun { dao.insertInstitutionsIfAbsent(any()) }
+            coJustRun { dao.updateInstitutionInfo(any(), any(), any()) }
+            dataSource.upsertInstitutions(listOf(domain))
+            coVerify {
+                dao.updateInstitutionInfo(
+                    itemId = "item1",
+                    institutionId = "ins_3",
+                    institutionName = "Chase",
+                )
+            }
         }
     }
 
@@ -132,6 +158,27 @@ class InstitutionLocalDataSourceImplTest {
             coJustRun { dao.deleteTransactions(any()) }
             dataSource.deleteTransactions(transactionIds)
             coVerify { dao.deleteTransactions(transactionIds) }
+        }
+    }
+
+    @Nested
+    inner class GetTransactionCursor {
+
+        @Test
+        fun `returns the stored cursor`() = runTest {
+            coEvery { dao.getTransactionCursor("item1") } returns "cursor-abc"
+            assertEquals("cursor-abc", dataSource.getTransactionCursor("item1"))
+        }
+    }
+
+    @Nested
+    inner class SaveTransactionCursor {
+
+        @Test
+        fun `saves the cursor`() = runTest {
+            coJustRun { dao.saveTransactionCursor(any(), any()) }
+            dataSource.saveTransactionCursor("item1", "cursor-abc")
+            coVerify { dao.saveTransactionCursor("item1", "cursor-abc") }
         }
     }
 }

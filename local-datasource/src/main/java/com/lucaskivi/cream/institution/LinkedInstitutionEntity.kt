@@ -10,10 +10,13 @@ import com.lucaskivi.cream.core.institution.model.LinkedInstitution
  * @param itemId Primary key. Matches [LinkedInstitution.itemId].
  * @param institutionId Provider's identifier for the institution.
  * @param institutionName Human-readable name of the institution.
+ * @param transactionCursor Opaque cursor from the last successful transaction sync, or null if
+ *   transactions have never been synced for this institution.
  */
 @Entity(tableName = "linked_institution")
 data class LinkedInstitutionEntity(
     @PrimaryKey val itemId: String,
     val institutionId: String,
     val institutionName: String,
+    val transactionCursor: String?,
 )

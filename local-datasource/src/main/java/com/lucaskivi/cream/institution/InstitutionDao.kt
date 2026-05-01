@@ -1,6 +1,8 @@
 package com.lucaskivi.cream.institution
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
@@ -37,12 +39,32 @@ interface InstitutionDao {
     fun observeTransactions(accountId: String): Flow<List<TransactionEntity>>
 
     /**
-     * Inserts or replaces each institution in [institutions].
+     * Inserts each institution that does not already exist. Existing rows — and crucially their
+     * [LinkedInstitutionEntity.transactionCursor] values — are left untouched.
      *
-     * @param institutions Institutions to upsert.
+     * @param institutions Institutions to insert.
      */
-    @Upsert
-    suspend fun upsertInstitutions(institutions: List<LinkedInstitutionEntity>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertInstitutionsIfAbsent(institutions: List<LinkedInstitutionEntity>)
+
+    /**
+     * Updates the [institutionId] and [institutionName] of the row identified by [itemId],
+     * leaving all other columns (including [LinkedInstitutionEntity.transactionCursor]) unchanged.
+     *
+     * @param itemId Primary key of the institution to update.
+     * @param institutionId New provider institution identifier.
+     * @param institutionName New human-readable institution name.
+     */
+    @Query(
+        "UPDATE linked_institution " +
+            "SET institutionId = :institutionId, institutionName = :institutionName " +
+            "WHERE itemId = :itemId"
+    )
+    suspend fun updateInstitutionInfo(
+        itemId: String,
+        institutionId: String,
+        institutionName: String,
+    )
 
     /**
      * Inserts or replaces each account in [accounts].
@@ -59,6 +81,29 @@ interface InstitutionDao {
      */
     @Upsert
     suspend fun upsertTransactions(transactions: List<TransactionEntity>)
+
+    /**
+     * Returns the stored transaction sync cursor for [itemId], or null if transactions have
+     * never been synced for that institution.
+     *
+     * @param itemId The institution whose cursor to retrieve.
+     */
+    @Query("SELECT transactionCursor FROM linked_institution WHERE itemId = :itemId")
+    suspend fun getTransactionCursor(itemId: String): String?
+
+    /**
+     * Persists [cursor] as the transaction sync cursor for the institution identified by [itemId].
+     *
+     * @param itemId The institution whose cursor to update.
+     * @param cursor Opaque cursor string from the last successful sync.
+     */
+    @Query(
+        "UPDATE linked_institution SET transactionCursor = :cursor WHERE itemId = :itemId"
+    )
+    suspend fun saveTransactionCursor(
+        itemId: String,
+        cursor: String,
+    )
 
     /**
      * Deletes the institution identified by [itemId] and, via cascade, all of its accounts and

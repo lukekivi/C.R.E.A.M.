@@ -55,6 +55,18 @@ inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
     }
 
 /**
+ * Chains [transform] onto the success value, leaving a failure unchanged.
+ *
+ * @param transform Next operation, invoked only when this is a [NetworkResult.Success].
+ * @return The result of [transform], or the original failure if any.
+ */
+inline fun <T, R> NetworkResult<T>.flatMap(transform: (T) -> NetworkResult<R>): NetworkResult<R> =
+    when (this) {
+        is NetworkResult.Success -> transform(value)
+        is NetworkResult.Failure -> this
+    }
+
+/**
  * Runs [block] and wraps the result in [NetworkResult.Success], or catches any exception and
  * wraps it in [NetworkResult.Failure].
  *
