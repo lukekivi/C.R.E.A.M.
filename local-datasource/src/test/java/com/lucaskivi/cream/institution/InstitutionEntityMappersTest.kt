@@ -23,6 +23,7 @@ class InstitutionEntityMappersTest {
             itemId = "item1",
             institutionId = "ins_3",
             institutionName = "Chase",
+            transactionCursor = "cursor-abc",
         )
         val domain = entity.toDomain()
         assertEquals("item1", domain.itemId)
@@ -31,7 +32,7 @@ class InstitutionEntityMappersTest {
     }
 
     @Test
-    fun `LinkedInstitution toEntity maps all fields`() {
+    fun `LinkedInstitution toEntity sets null transactionCursor`() {
         val domain = LinkedInstitution(
             itemId = "item1",
             institutionId = "ins_3",
@@ -41,6 +42,7 @@ class InstitutionEntityMappersTest {
         assertEquals("item1", entity.itemId)
         assertEquals("ins_3", entity.institutionId)
         assertEquals("Chase", entity.institutionName)
+        assertNull(entity.transactionCursor)
     }
 
     @Test
@@ -229,6 +231,7 @@ class InstitutionEntityMappersTest {
             itemId = "item1",
             institutionId = "ins_3",
             institutionName = "Chase",
+            transactionCursor = null,
         )
         val accountEntity = FinancialAccountEntity(
             accountId = "acc1",
@@ -256,7 +259,7 @@ class InstitutionEntityMappersTest {
     @Test
     fun `InstitutionWithAccountsEntity toDomain handles empty accounts list`() {
         val relation = InstitutionWithAccountsEntity(
-            institution = LinkedInstitutionEntity("item1", "ins_3", "Chase"),
+            institution = LinkedInstitutionEntity("item1", "ins_3", "Chase", null),
             accounts = emptyList(),
         )
         assertEquals(0, relation.toDomain().accounts.size)

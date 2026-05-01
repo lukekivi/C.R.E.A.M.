@@ -17,7 +17,7 @@ import androidx.room.TypeConverters
         FinancialAccountEntity::class,
         TransactionEntity::class,
     ],
-    version = 1,
+    version = 2,
 )
 @TypeConverters(LocalDateConverter::class)
 abstract class CreamDatabase : RoomDatabase() {
@@ -47,7 +47,7 @@ abstract class CreamDatabase : RoomDatabase() {
                     context.applicationContext,
                     CreamDatabase::class.java,
                     "cream_database",
-                ).build().also { instance = it }
+                ).fallbackToDestructiveMigration(true).build().also { instance = it }
             }
     }
 }
