@@ -80,7 +80,8 @@ internal class InstitutionEntityTransformer {
         )
 
     /**
-     * Converts a [LinkedInstitution] into its database row.
+     * Converts a [LinkedInstitution] into a new database row with a null transaction cursor.
+     * Only suitable for initial inserts; it would overwrite a stored cursor.
      *
      * @param institution The institution to convert.
      */
@@ -89,6 +90,7 @@ internal class InstitutionEntityTransformer {
             itemId = institution.itemId,
             institutionId = institution.institutionId,
             institutionName = institution.institutionName,
+            transactionCursor = null,
         )
 
     /**

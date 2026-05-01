@@ -23,6 +23,7 @@ class InstitutionEntityTransformerTest {
                 itemId = "item1",
                 institutionId = "ins_3",
                 institutionName = "Chase",
+                transactionCursor = "cursor-abc",
             )
             val domain = transformer.toLinkedInstitution(entity)
             assertEquals("item1", domain.itemId)
@@ -40,6 +41,7 @@ class InstitutionEntityTransformerTest {
                 itemId = "item1",
                 institutionId = "ins_3",
                 institutionName = "Chase",
+                transactionCursor = null,
             )
             val accountEntity = FinancialAccountEntity(
                 accountId = "acc1",
@@ -67,7 +69,7 @@ class InstitutionEntityTransformerTest {
         @Test
         fun `handles empty accounts list`() {
             val relation = InstitutionWithAccountsEntity(
-                institution = LinkedInstitutionEntity("item1", "ins_3", "Chase"),
+                institution = LinkedInstitutionEntity("item1", "ins_3", "Chase", null),
                 accounts = emptyList(),
             )
             assertEquals(0, transformer.toLinkedInstitutionWithAccounts(relation).accounts.size)
@@ -193,7 +195,7 @@ class InstitutionEntityTransformerTest {
     inner class ToLinkedInstitutionEntity {
 
         @Test
-        fun `maps all fields`() {
+        fun `maps all fields with a null transaction cursor`() {
             val domain = LinkedInstitution(
                 itemId = "item1",
                 institutionId = "ins_3",
@@ -203,6 +205,7 @@ class InstitutionEntityTransformerTest {
             assertEquals("item1", entity.itemId)
             assertEquals("ins_3", entity.institutionId)
             assertEquals("Chase", entity.institutionName)
+            assertNull(entity.transactionCursor)
         }
 
         @Test
