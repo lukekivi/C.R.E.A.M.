@@ -2,7 +2,7 @@ package com.lucaskivi.cream.institution
 
 import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
-import com.lucaskivi.cream.institution.model.LinkedInstitutionWithAccounts
+import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.institution.model.TransactionDelta
 
 /**
