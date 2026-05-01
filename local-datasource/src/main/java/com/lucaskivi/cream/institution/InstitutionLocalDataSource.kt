@@ -34,7 +34,8 @@ interface InstitutionLocalDataSource {
     fun observeTransactions(accountId: String): Flow<List<Transaction>>
 
     /**
-     * Inserts or replaces each institution in [institutions].
+     * Inserts or updates each institution in [institutions] without touching the stored
+     * transaction cursor. New rows receive a null cursor; existing rows keep their cursor.
      *
      * @param institutions Institutions to upsert.
      */
@@ -68,4 +69,23 @@ interface InstitutionLocalDataSource {
      * @param transactionIds IDs of the transactions to delete.
      */
     suspend fun deleteTransactions(transactionIds: List<String>)
+
+    /**
+     * Returns the stored transaction sync cursor for [itemId], or null if transactions have
+     * never been synced for that institution.
+     *
+     * @param itemId The institution whose cursor to retrieve.
+     */
+    suspend fun getTransactionCursor(itemId: String): String?
+
+    /**
+     * Persists [cursor] as the transaction sync cursor for the institution identified by [itemId].
+     *
+     * @param itemId The institution whose cursor to update.
+     * @param cursor Opaque cursor string from the last successful sync.
+     */
+    suspend fun saveTransactionCursor(
+        itemId: String,
+        cursor: String,
+    )
 }
