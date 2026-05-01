@@ -4,9 +4,9 @@ package com.lucaskivi.cream.core.institution.model
  * High-level classification of a financial account.
  *
  * Sub-types (e.g. "checking" vs "savings" within [DEPOSITORY]) are captured separately in
- * [Account.subtype].
+ * [FinancialAccount.subtype].
  */
-enum class AccountType {
+enum class FinancialAccountType {
     /**
      * Revolving credit account such as a credit card.
      */

@@ -19,12 +19,12 @@ package com.lucaskivi.cream.core.institution.model
  * @param isoCurrencyCode ISO 4217 currency code for the balance values (e.g. "USD"), or null if
  *   not returned.
  */
-data class Account(
+data class FinancialAccount(
     val accountId: String,
     val itemId: String,
     val displayName: String,
     val mask: String?,
-    val type: AccountType,
+    val type: FinancialAccountType,
     val subtype: String?,
     val balanceCurrent: Double?,
     val balanceAvailable: Double?,

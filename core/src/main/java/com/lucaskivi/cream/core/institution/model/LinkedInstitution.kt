@@ -3,7 +3,7 @@ package com.lucaskivi.cream.core.institution.model
 /**
  * A financial institution (bank, credit union, credit-card issuer, etc.) that the user has
  * linked to their account. One linked institution represents a single login at a single
- * institution and may hold multiple [Account]s.
+ * institution and may hold multiple [FinancialAccount]s.
  *
  * @param itemId Opaque identifier assigned by the backend when the user completes the link
  *   flow. Used as the stable handle for all subsequent operations on this institution.
