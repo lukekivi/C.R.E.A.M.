@@ -35,7 +35,14 @@ class InstitutionLocalDataSourceImpl internal constructor(
             .map { list -> list.map { it.toDomain() } }
 
     override suspend fun upsertInstitutions(institutions: List<LinkedInstitution>) {
-        dao.upsertInstitutions(institutions.map { it.toEntity() })
+        dao.insertInstitutionsIfAbsent(institutions.map { it.toEntity() })
+        institutions.forEach {
+            dao.updateInstitutionInfo(
+                itemId = it.itemId,
+                institutionId = it.institutionId,
+                institutionName = it.institutionName,
+            )
+        }
     }
 
     override suspend fun upsertAccounts(accounts: List<FinancialAccount>) {
@@ -52,5 +59,15 @@ class InstitutionLocalDataSourceImpl internal constructor(
 
     override suspend fun deleteTransactions(transactionIds: List<String>) {
         dao.deleteTransactions(transactionIds)
+    }
+
+    override suspend fun getTransactionCursor(itemId: String): String? =
+        dao.getTransactionCursor(itemId)
+
+    override suspend fun saveTransactionCursor(
+        itemId: String,
+        cursor: String,
+    ) {
+        dao.saveTransactionCursor(itemId, cursor)
     }
 }
