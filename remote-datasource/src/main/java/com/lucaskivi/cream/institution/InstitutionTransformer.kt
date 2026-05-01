@@ -1,7 +1,7 @@
 package com.lucaskivi.cream.institution
 
-import com.lucaskivi.cream.core.institution.model.Account
-import com.lucaskivi.cream.core.institution.model.AccountType
+import com.lucaskivi.cream.core.institution.model.FinancialAccount
+import com.lucaskivi.cream.core.institution.model.FinancialAccountType
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.Transaction
 import com.lucaskivi.cream.institution.model.LinkedInstitutionWithAccounts
@@ -69,7 +69,7 @@ internal class InstitutionTransformer {
         )
         val accounts = raw["accounts"]
             .asMapList()
-            .map { toAccount(it, itemId) }
+            .map { toFinancialAccount(it, itemId) }
         return LinkedInstitutionWithAccounts(
             institution = institution,
             accounts = accounts,
@@ -77,22 +77,22 @@ internal class InstitutionTransformer {
     }
 
     /**
-     * Converts one raw account entry into an [Account].
+     * Converts one raw account entry into an [FinancialAccount].
      *
      * @param raw A single entry of an institution's `accounts` array.
      * @param itemId Identifier of the institution that owns this account.
      */
-    fun toAccount(
+    fun toFinancialAccount(
         raw: Map<String, Any?>,
         itemId: String,
-    ): Account {
+    ): FinancialAccount {
         val balance = raw["balance"].asMap()
-        return Account(
+        return FinancialAccount(
             accountId = raw["accountId"] as String,
             itemId = itemId,
             displayName = raw["name"] as String,
             mask = raw["mask"] as? String,
-            type = toAccountType(raw["type"] as? String),
+            type = toFinancialAccountType(raw["type"] as? String),
             subtype = raw["subtype"] as? String,
             balanceCurrent = (balance["current"] as? Number)?.toDouble(),
             balanceAvailable = (balance["available"] as? Number)?.toDouble(),
@@ -101,18 +101,18 @@ internal class InstitutionTransformer {
     }
 
     /**
-     * Maps a raw account-type string to [AccountType], case-insensitively. Unrecognised or
-     * missing values map to [AccountType.OTHER].
+     * Maps a raw account-type string to [FinancialAccountType], case-insensitively. Unrecognised or
+     * missing values map to [FinancialAccountType.OTHER].
      *
-     * @param raw Account type string (e.g. "depository", "credit"), or null if absent.
+     * @param raw FinancialAccount type string (e.g. "depository", "credit"), or null if absent.
      */
-    fun toAccountType(raw: String?): AccountType =
+    fun toFinancialAccountType(raw: String?): FinancialAccountType =
         when (raw?.lowercase()) {
-            "credit" -> AccountType.CREDIT
-            "depository" -> AccountType.DEPOSITORY
-            "investment" -> AccountType.INVESTMENT
-            "loan" -> AccountType.LOAN
-            else -> AccountType.OTHER
+            "credit" -> FinancialAccountType.CREDIT
+            "depository" -> FinancialAccountType.DEPOSITORY
+            "investment" -> FinancialAccountType.INVESTMENT
+            "loan" -> FinancialAccountType.LOAN
+            else -> FinancialAccountType.OTHER
         }
 
     /**

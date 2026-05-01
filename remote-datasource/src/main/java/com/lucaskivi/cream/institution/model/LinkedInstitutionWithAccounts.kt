@@ -1,6 +1,6 @@
 package com.lucaskivi.cream.institution.model
 
-import com.lucaskivi.cream.core.institution.model.Account
+import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 
 /**
@@ -11,5 +11,5 @@ import com.lucaskivi.cream.core.institution.model.LinkedInstitution
  */
 data class LinkedInstitutionWithAccounts(
     val institution: LinkedInstitution,
-    val accounts: List<Account>,
+    val accounts: List<FinancialAccount>,
 )
