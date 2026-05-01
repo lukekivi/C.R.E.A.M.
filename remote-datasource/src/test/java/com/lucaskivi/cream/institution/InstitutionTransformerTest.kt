@@ -1,6 +1,6 @@
 package com.lucaskivi.cream.institution
 
-import com.lucaskivi.cream.core.institution.model.AccountType
+import com.lucaskivi.cream.core.institution.model.FinancialAccountType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
@@ -37,30 +37,30 @@ class InstitutionTransformerTest {
     }
 
     @Nested
-    inner class ToAccountType {
+    inner class ToFinancialAccountType {
 
         @Test
         fun `maps known type strings`() {
-            assertEquals(AccountType.DEPOSITORY, transformer.toAccountType("depository"))
-            assertEquals(AccountType.CREDIT, transformer.toAccountType("credit"))
-            assertEquals(AccountType.LOAN, transformer.toAccountType("loan"))
-            assertEquals(AccountType.INVESTMENT, transformer.toAccountType("investment"))
+            assertEquals(FinancialAccountType.DEPOSITORY, transformer.toFinancialAccountType("depository"))
+            assertEquals(FinancialAccountType.CREDIT, transformer.toFinancialAccountType("credit"))
+            assertEquals(FinancialAccountType.LOAN, transformer.toFinancialAccountType("loan"))
+            assertEquals(FinancialAccountType.INVESTMENT, transformer.toFinancialAccountType("investment"))
         }
 
         @Test
         fun `is case-insensitive`() {
-            assertEquals(AccountType.DEPOSITORY, transformer.toAccountType("DEPOSITORY"))
-            assertEquals(AccountType.CREDIT, transformer.toAccountType("Credit"))
+            assertEquals(FinancialAccountType.DEPOSITORY, transformer.toFinancialAccountType("DEPOSITORY"))
+            assertEquals(FinancialAccountType.CREDIT, transformer.toFinancialAccountType("Credit"))
         }
 
         @Test
         fun `returns OTHER for unknown string`() {
-            assertEquals(AccountType.OTHER, transformer.toAccountType("brokerage"))
+            assertEquals(FinancialAccountType.OTHER, transformer.toFinancialAccountType("brokerage"))
         }
 
         @Test
         fun `returns OTHER for null`() {
-            assertEquals(AccountType.OTHER, transformer.toAccountType(null))
+            assertEquals(FinancialAccountType.OTHER, transformer.toFinancialAccountType(null))
         }
     }
 
@@ -114,7 +114,7 @@ class InstitutionTransformerTest {
     }
 
     @Nested
-    inner class ToAccount {
+    inner class ToFinancialAccount {
 
         @Test
         fun `maps all fields correctly`() {
@@ -131,12 +131,12 @@ class InstitutionTransformerTest {
                 "subtype" to "checking",
                 "balance" to balance,
             )
-            val account = transformer.toAccount(map, "item1")
+            val account = transformer.toFinancialAccount(map, "item1")
             assertEquals("acc1", account.accountId)
             assertEquals("item1", account.itemId)
             assertEquals("Total Checking", account.displayName)
             assertEquals("1234", account.mask)
-            assertEquals(AccountType.DEPOSITORY, account.type)
+            assertEquals(FinancialAccountType.DEPOSITORY, account.type)
             assertEquals("checking", account.subtype)
             assertEquals(1000.0, account.balanceCurrent!!, 0.0)
             assertEquals(950.0, account.balanceAvailable!!, 0.0)
@@ -158,9 +158,9 @@ class InstitutionTransformerTest {
                 "subtype" to null,
                 "balance" to balance,
             )
-            val account = transformer.toAccount(map, "item2")
+            val account = transformer.toFinancialAccount(map, "item2")
             assertNull(account.mask)
-            assertEquals(AccountType.OTHER, account.type)
+            assertEquals(FinancialAccountType.OTHER, account.type)
             assertNull(account.subtype)
             assertNull(account.balanceCurrent)
             assertNull(account.balanceAvailable)

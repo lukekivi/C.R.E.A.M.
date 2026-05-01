@@ -3,7 +3,7 @@ package com.lucaskivi.cream.core.institution.model
 import java.time.LocalDate
 
 /**
- * A single financial transaction on an [Account].
+ * A single financial transaction on a [FinancialAccount].
  *
  * Amounts follow the sign convention where positive values represent debits (money leaving the
  * account) and negative values represent credits (money entering). For example, a $10 purchase
@@ -11,7 +11,7 @@ import java.time.LocalDate
  *
  * @param transactionId Stable identifier for this transaction. Used as the primary key in local
  *   storage and for deduplication during delta sync.
- * @param accountId Identifier of the [Account] this transaction belongs to.
+ * @param accountId Identifier of the [FinancialAccount] this transaction belongs to.
  * @param amount Transaction amount in the account's currency. Positive = debit; negative = credit.
  * @param isoCurrencyCode ISO 4217 currency code (e.g. "USD"), or null if not returned.
  * @param date Date the transaction posted, or the expected post date if still pending.
