@@ -4,7 +4,7 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.catching
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
-import com.lucaskivi.cream.institution.model.LinkedInstitutionWithAccounts
+import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.institution.model.TransactionDelta
 import com.lucaskivi.cream.remote.asMap
 import kotlinx.coroutines.tasks.await
