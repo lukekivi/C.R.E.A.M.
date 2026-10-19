@@ -15,3 +15,7 @@ Data flows up: Datasource → Repository → ViewModel → Composable.
 ## Code style
 
 See [STYLE.md](STYLE.md) for code conventions (documentation, formatting, module boundaries). Follow it for every change.
+
+## Work tracking
+
+Epics and tickets live in `docs/specs/` as committed markdown files. See [docs/work-tracking.md](docs/work-tracking.md) for format and lifecycle. ADRs live in `docs/decisions/`.
