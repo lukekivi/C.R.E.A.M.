@@ -9,7 +9,18 @@ android {
             minorApiLevel = 1
         }
     }
-    defaultConfig { minSdk = 30 }
+    defaultConfig {
+        minSdk = 30
+        buildConfigField("boolean", "USE_FUNCTIONS_EMULATOR", "false")
+    }
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "USE_FUNCTIONS_EMULATOR", "true")
+        }
+    }
+    buildFeatures {
+        buildConfig = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
