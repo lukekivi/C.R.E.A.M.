@@ -28,9 +28,11 @@ private fun functions(): FirebaseFunctions =
         }
 
 /**
- * Host the Android emulator uses to reach the development machine's loopback interface.
+ * Device-local loopback address. Reaches the development machine only while
+ * `adb reverse tcp:5001 tcp:5001` forwards the port, which works on both physical devices and
+ * the Android emulator.
  */
-private const val FUNCTIONS_EMULATOR_HOST = "10.0.2.2"
+private const val FUNCTIONS_EMULATOR_HOST = "127.0.0.1"
 
 /**
  * Port the Functions emulator listens on, matching `emulators.functions.port` in `firebase.json`.

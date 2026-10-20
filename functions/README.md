@@ -63,7 +63,11 @@ The deployed code reads secrets from Firebase. The emulator reads them from a lo
    ```
    This builds (`tsc`) and starts the Functions, Firestore, and Auth emulators. Default ports: Functions `5001`, Firestore `8080`, Auth `9099`. The Emulator UI is at `http://localhost:4000`.
 
-3. Debug builds of the Android client call the Functions emulator automatically at `10.0.2.2:5001` (the Android emulator's alias for the host machine); release builds call deployed Functions. Only the Android emulator is supported — a physical device can't reach `10.0.2.2`. The client signs in against production Auth; the Functions emulator skips ID-token verification, so those tokens are accepted and `request.auth.uid` is populated.
+3. Debug builds of the Android client call the Functions emulator automatically at `127.0.0.1:5001`; release builds call deployed Functions. Forward the port from the device to the host after each connect or reboot:
+   ```sh
+   adb reverse tcp:5001 tcp:5001
+   ```
+   This works for physical devices and the Android emulator alike. The client signs in against production Auth; the Functions emulator skips ID-token verification, so those tokens are accepted and `request.auth.uid` is populated.
 
 ### Manually invoking a callable
 

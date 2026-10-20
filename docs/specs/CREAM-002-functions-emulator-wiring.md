@@ -111,7 +111,9 @@ _Throwaway smoke test (not merged)_
 - [x] Record the pass/fail of each callable under a **Smoke-test results** note in this ticket.
 - [x] Delete `CallableSmokeTest.kt` and the `HomeViewModel` call. `git diff main --stat` must show neither.
 
-**Smoke-test results** (2026-10-20, physical Pixel 9 Pro via `adb reverse tcp:5001 tcp:5001` with a temporary `127.0.0.1` host. No AVD was in use, so the shipped `10.0.2.2` path was not exercised on device. Production Auth sign-in, emulators + Plaid Sandbox.)
+**Change after the first run:** the shipped host moved from `10.0.2.2` to `127.0.0.1` with `adb reverse tcp:5001 tcp:5001`. The primary dev device is physical and can't reach `10.0.2.2`. `adb reverse` works on both physical devices and the Android emulator. Where the plan and acceptance criteria above say `10.0.2.2`, read `127.0.0.1` + `adb reverse`.
+
+**Smoke-test results** (2026-10-20, physical Pixel 9 Pro via `adb reverse tcp:5001 tcp:5001`. Production Auth sign-in, emulators + Plaid Sandbox. The first run used a temporary `127.0.0.1` host; the rerun used the shipped config.)
 
 | Step | Callable | Result |
 |---|---|---|
@@ -122,6 +124,8 @@ _Throwaway smoke test (not merged)_
 | 5 | `syncTransactions(cursor)` | PASS: 0/0/0 delta |
 | 6 | `disconnectInstitution` | PASS |
 | 7 | `listInstitutions` | PASS: empty, so the item doc was removed |
+
+Rerun on the shipped `127.0.0.1` + `adb reverse` config: all 7 steps PASS (51 added on the initial sync, empty delta on the second).
 
 Harness and temporary host/cleartext tweaks were removed. `firestore.rules` default-deny covers `users/{uid}/items/*`, and `firebase.json` points at it.
 
@@ -143,7 +147,7 @@ _Related code_
 
 _Gaps / follow-up_
 
-- Physical devices can't reach `10.0.2.2`. If that's needed, make the host a Gradle property or use `adb reverse tcp:5001 tcp:5001` with `localhost`. Not in this ticket.
+- ~~Physical devices can't reach `10.0.2.2`.~~ Resolved in this ticket: the host is `127.0.0.1` + `adb reverse`.
 - Debug sign-ins create real users in production Auth (`cream-5eeda`). This is acceptable for solo dev; revisit if the Auth emulator is ever adopted.
 
 _Open questions_
