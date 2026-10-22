@@ -8,4 +8,6 @@ import android.content.Context
  * @param context Application context used to access local storage.
  */
 fun institutionLocalDataSource(context: Context): InstitutionLocalDataSource =
-    InstitutionLocalDataSourceImpl.create(context)
+    InstitutionLocalDataSourceImpl(
+        context = context,
+    )

@@ -21,6 +21,8 @@ android {
 
 dependencies {
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.platform.launcher)
     api(project(":core"))
     implementation(platform(libs.firebase.bom))

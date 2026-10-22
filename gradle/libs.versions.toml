@@ -14,6 +14,7 @@ firebaseBom = "33.7.0"
 googleServices = "4.4.2"
 credentials = "1.3.0"
 googleid = "1.1.1"
+mockk = "1.13.12"
 navigation3 = "1.1.1"
 
 [libraries]
@@ -45,6 +46,8 @@ firebase-functions = { group = "com.google.firebase", name = "firebase-functions
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
