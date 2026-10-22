@@ -14,24 +14,14 @@ import kotlinx.coroutines.tasks.await
 /**
  * Firebase Auth implementation of [AuthDataSource].
  *
- * Instantiate via [create]; the constructor is private to enforce factory usage.
+ * Instantiate via [authDataSource]; the constructor is internal to prevent use outside
+ * this module.
  *
  * @param firebaseAuth Underlying Firebase Auth instance.
  */
-class AuthDataSourceImpl private constructor(
+class AuthDataSourceImpl internal constructor(
     private val firebaseAuth: FirebaseAuth,
 ) : AuthDataSource {
-
-    /**
-     * Factory entry points for [AuthDataSourceImpl].
-     */
-    companion object {
-        /**
-         * Creates an [AuthDataSourceImpl] backed by the default [FirebaseAuth] instance.
-         */
-        fun create(): AuthDataSourceImpl =
-            AuthDataSourceImpl(FirebaseAuth.getInstance())
-    }
 
     override val currentUser: User?
         get() = firebaseAuth.currentUser?.toDomainUser()
