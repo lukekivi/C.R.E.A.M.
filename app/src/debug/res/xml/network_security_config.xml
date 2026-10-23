@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug only: permits plain HTTP to the host machine so the app can reach local Firebase emulators.
+     Keep in sync with FUNCTIONS_EMULATOR_HOST in :remote-datasource RemoteDataSourceFactory.kt. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
