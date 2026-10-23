@@ -109,10 +109,11 @@ This minimizes diff churn if the body later needs to grow into a block body — 
 
 ## Method chains
 
-When chaining method calls (`.foo().bar().baz()`), keep the receiver and its first call together, then break each subsequent chained call onto its own line, indented one level deeper.
+When chaining two or more method calls (`.foo().bar()`), put the receiver alone on the first line, then each call on its own line, indented one level deeper. A constructor call such as `Foo.Builder()` counts as the receiver.
 
 ```kotlin
-authRepository.signInWithEmail(email, password)
+authRepository
+    .signInWithEmail(email, password)
     .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
     .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
 ```

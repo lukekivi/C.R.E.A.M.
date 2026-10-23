@@ -105,8 +105,9 @@ private fun Avatar(initial: String) {
  * to email, and then to "?" when neither is set.
  */
 private fun User?.welcomeInitial(): String =
-    this?.displayName?.firstOrNull()?.uppercaseChar()?.toString()
-        ?: this?.email?.firstOrNull()?.uppercaseChar()?.toString()
+    (this?.displayName?.firstOrNull() ?: this?.email?.firstOrNull())
+        ?.uppercaseChar()
+        ?.toString()
         ?: "?"
 
 /**

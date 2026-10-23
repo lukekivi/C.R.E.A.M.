@@ -47,7 +47,8 @@ class RegisterViewModel(
     ) {
         viewModelScope.launch {
             mutableUiState.update { it.copy(isLoading = true, error = null) }
-            authRepository.createUserWithEmail(email, password)
+            authRepository
+                .createUserWithEmail(email, password)
                 .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
                 .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
         }

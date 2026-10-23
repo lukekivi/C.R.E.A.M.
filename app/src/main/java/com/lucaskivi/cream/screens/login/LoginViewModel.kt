@@ -54,7 +54,8 @@ class LoginViewModel(
     ) {
         viewModelScope.launch {
             mutableUiState.update { it.copy(isLoading = true, error = null) }
-            authRepository.signInWithEmail(email, password)
+            authRepository
+                .signInWithEmail(email, password)
                 .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
                 .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
         }
@@ -83,7 +84,8 @@ class LoginViewModel(
                     .build()
                 val result = credentialManager.getCredential(context, request)
                 val idToken = GoogleIdTokenCredential.createFrom(result.credential.data).idToken
-                authRepository.signInWithGoogle(idToken)
+                authRepository
+                    .signInWithGoogle(idToken)
                     .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
                     .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
             } catch (e: GetCredentialException) {
