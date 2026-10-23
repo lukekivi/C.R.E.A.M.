@@ -3,11 +3,16 @@ package com.lucaskivi.cream.institution
 import android.content.Context
 
 /**
- * Creates the production [InstitutionLocalDataSource] implementation.
+ * Creates the production [InstitutionLocalDataSource] implementation backed by the local Room
+ * database.
  *
- * @param context Application context used to access local storage.
+ * @param context Application context used to open the database file.
  */
-fun institutionLocalDataSource(context: Context): InstitutionLocalDataSource =
-    InstitutionLocalDataSourceImpl(
-        context = context,
+fun institutionLocalDataSource(context: Context): InstitutionLocalDataSource {
+    val dao = CreamDatabase
+        .getInstance(context)
+        .institutionDao()
+    return InstitutionLocalDataSourceImpl(
+        dao = dao,
     )
+}

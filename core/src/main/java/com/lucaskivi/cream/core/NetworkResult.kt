@@ -55,6 +55,18 @@ inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
     }
 
 /**
+ * Returns the success value, or throws the failure cause.
+ *
+ * Intended for use inside [catching] blocks where you want sequential network calls to
+ * short-circuit on the first failure without nested `when` expressions.
+ */
+fun <T> NetworkResult<T>.getOrThrow(): T =
+    when (this) {
+        is NetworkResult.Success -> value
+        is NetworkResult.Failure -> throw cause
+    }
+
+/**
  * Runs [block] and wraps the result in [NetworkResult.Success], or catches any exception and
  * wraps it in [NetworkResult.Failure].
  *

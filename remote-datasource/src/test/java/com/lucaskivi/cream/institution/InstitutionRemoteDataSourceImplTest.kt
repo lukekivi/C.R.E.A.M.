@@ -6,12 +6,12 @@ import com.google.firebase.functions.HttpsCallableReference
 import com.google.firebase.functions.HttpsCallableResult
 import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
+import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.CREATE_LINK_TOKEN
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.DISCONNECT_INSTITUTION
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.EXCHANGE_PUBLIC_TOKEN
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.LIST_INSTITUTIONS
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.SYNC_TRANSACTIONS
-import com.lucaskivi.cream.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.institution.model.TransactionDelta
 import io.mockk.every
 import io.mockk.mockk
