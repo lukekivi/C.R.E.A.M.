@@ -49,7 +49,8 @@ class AuthDataSourceImpl private constructor(
         password: String,
     ): NetworkResult<User> =
         catching {
-            firebaseAuth.signInWithEmailAndPassword(email, password)
+            firebaseAuth
+                .signInWithEmailAndPassword(email, password)
                 .await()
                 .user!!
                 .toDomainUser()
@@ -60,7 +61,8 @@ class AuthDataSourceImpl private constructor(
         password: String,
     ): NetworkResult<User> =
         catching {
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
+            firebaseAuth
+                .createUserWithEmailAndPassword(email, password)
                 .await()
                 .user!!
                 .toDomainUser()
@@ -69,7 +71,8 @@ class AuthDataSourceImpl private constructor(
     override suspend fun signInWithGoogle(idToken: String): NetworkResult<User> =
         catching {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
-            firebaseAuth.signInWithCredential(credential)
+            firebaseAuth
+                .signInWithCredential(credential)
                 .await()
                 .user!!
                 .toDomainUser()
