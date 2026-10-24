@@ -117,10 +117,12 @@ class InstitutionRepositoryImplTest {
 
             // Verify
             assertInstanceOf(NetworkResult.Success::class.java, result)
-            coVerify { remote.exchangePublicToken("tok", "ins_3", "Chase") }
-            coVerify { remote.listInstitutions() }
-            coVerify { local.upsertInstitutions(emptyList()) }
-            coVerify { local.upsertAccounts(emptyList()) }
+            coVerify {
+                remote.exchangePublicToken("tok", "ins_3", "Chase")
+                remote.listInstitutions()
+                local.upsertInstitutions(emptyList())
+                local.upsertAccounts(emptyList())
+            }
             confirmVerified(remote, local)
         }
 
@@ -157,8 +159,10 @@ class InstitutionRepositoryImplTest {
 
             // Verify
             assertInstanceOf(NetworkResult.Failure::class.java, result)
-            coVerify { remote.exchangePublicToken("tok", "ins_3", "Chase") }
-            coVerify { remote.listInstitutions() }
+            coVerify {
+                remote.exchangePublicToken("tok", "ins_3", "Chase")
+                remote.listInstitutions()
+            }
             confirmVerified(remote, local)
         }
     }
@@ -183,11 +187,13 @@ class InstitutionRepositoryImplTest {
 
             // Verify
             assertInstanceOf(NetworkResult.Success::class.java, result)
-            coVerify { local.upsertTransactions(delta.added + delta.modified) }
-            coVerify { local.deleteTransactions(delta.removedIds) }
-            coVerify { local.saveTransactionCursor("item1", "cursor-new") }
-            coVerify { local.getTransactionCursor("item1") }
-            coVerify { remote.syncTransactions("item1", "cursor-old") }
+            coVerify {
+                local.getTransactionCursor("item1")
+                remote.syncTransactions("item1", "cursor-old")
+                local.upsertTransactions(delta.added + delta.modified)
+                local.deleteTransactions(delta.removedIds)
+                local.saveTransactionCursor("item1", "cursor-new")
+            }
             confirmVerified(remote, local)
         }
 
@@ -207,11 +213,13 @@ class InstitutionRepositoryImplTest {
             repo.syncTransactions("item1")
 
             // Verify
-            coVerify { remote.syncTransactions("item1", null) }
-            coVerify { local.getTransactionCursor("item1") }
-            coVerify { local.upsertTransactions(delta.added + delta.modified) }
-            coVerify { local.deleteTransactions(delta.removedIds) }
-            coVerify { local.saveTransactionCursor("item1", "cursor-first") }
+            coVerify {
+                local.getTransactionCursor("item1")
+                remote.syncTransactions("item1", null)
+                local.upsertTransactions(delta.added + delta.modified)
+                local.deleteTransactions(delta.removedIds)
+                local.saveTransactionCursor("item1", "cursor-first")
+            }
             confirmVerified(remote, local)
         }
 
@@ -227,11 +235,15 @@ class InstitutionRepositoryImplTest {
 
             // Verify
             assertInstanceOf(NetworkResult.Failure::class.java, result)
-            coVerify(exactly = 0) { local.upsertTransactions(any()) }
-            coVerify(exactly = 0) { local.deleteTransactions(any()) }
-            coVerify(exactly = 0) { local.saveTransactionCursor(any(), any()) }
-            coVerify { local.getTransactionCursor("item1") }
-            coVerify { remote.syncTransactions("item1", null) }
+            coVerify(exactly = 0) {
+                local.upsertTransactions(any())
+                local.deleteTransactions(any())
+                local.saveTransactionCursor(any(), any())
+            }
+            coVerify {
+                local.getTransactionCursor("item1")
+                remote.syncTransactions("item1", null)
+            }
             confirmVerified(remote, local)
         }
     }
@@ -249,8 +261,10 @@ class InstitutionRepositoryImplTest {
 
             // Verify
             assertInstanceOf(NetworkResult.Success::class.java, result)
-            coVerify { remote.disconnectInstitution("item1") }
-            coVerify { local.deleteInstitution("item1") }
+            coVerify {
+                remote.disconnectInstitution("item1")
+                local.deleteInstitution("item1")
+            }
             confirmVerified(remote, local)
         }
 
@@ -287,9 +301,11 @@ class InstitutionRepositoryImplTest {
 
             // Verify
             assertInstanceOf(NetworkResult.Success::class.java, result)
-            coVerify { local.upsertInstitutions(listOf(institution)) }
-            coVerify { local.upsertAccounts(accounts) }
-            coVerify { remote.listInstitutions() }
+            coVerify {
+                remote.listInstitutions()
+                local.upsertInstitutions(listOf(institution))
+                local.upsertAccounts(accounts)
+            }
             confirmVerified(remote, local)
         }
 

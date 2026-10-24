@@ -47,8 +47,10 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
-            verify { dao.observeInstitutionsWithAccounts() }
-            verify { transformer.toLinkedInstitutionWithAccounts(entity) }
+            verify {
+                dao.observeInstitutionsWithAccounts()
+                transformer.toLinkedInstitutionWithAccounts(entity)
+            }
             confirmVerified(dao, transformer)
         }
     }
@@ -71,8 +73,10 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals(domain, result)
-            verify { dao.observeAccount("acc1") }
-            verify { transformer.toFinancialAccount(entity) }
+            verify {
+                dao.observeAccount("acc1")
+                transformer.toFinancialAccount(entity)
+            }
             confirmVerified(dao, transformer)
         }
 
@@ -112,8 +116,10 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
-            verify { dao.observeTransactions("acc1") }
-            verify { transformer.toTransaction(entity) }
+            verify {
+                dao.observeTransactions("acc1")
+                transformer.toTransaction(entity)
+            }
             confirmVerified(dao, transformer)
         }
     }
@@ -138,9 +144,9 @@ class InstitutionLocalDataSourceImplTest {
             dataSource.upsertInstitutions(listOf(domain))
 
             // Verify
-            verify { transformer.toLinkedInstitutionEntity(domain) }
-            coVerify { dao.insertInstitutionsIfAbsent(listOf(entity)) }
             coVerify {
+                transformer.toLinkedInstitutionEntity(domain)
+                dao.insertInstitutionsIfAbsent(listOf(entity))
                 dao.updateInstitutionInfo(
                     itemId = "item1",
                     institutionId = "ins_3",
@@ -166,8 +172,10 @@ class InstitutionLocalDataSourceImplTest {
             dataSource.upsertAccounts(listOf(domain))
 
             // Verify
-            coVerify { dao.upsertAccounts(listOf(entity)) }
-            verify { transformer.toFinancialAccountEntity(domain) }
+            coVerify {
+                transformer.toFinancialAccountEntity(domain)
+                dao.upsertAccounts(listOf(entity))
+            }
             confirmVerified(dao, transformer)
         }
     }
@@ -187,8 +195,10 @@ class InstitutionLocalDataSourceImplTest {
             dataSource.upsertTransactions(listOf(domain))
 
             // Verify
-            coVerify { dao.upsertTransactions(listOf(entity)) }
-            verify { transformer.toTransactionEntity(domain) }
+            coVerify {
+                transformer.toTransactionEntity(domain)
+                dao.upsertTransactions(listOf(entity))
+            }
             confirmVerified(dao, transformer)
         }
     }
