@@ -13,6 +13,7 @@ import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.LIST_INSTITUTIONS
 import com.lucaskivi.cream.institution.InstitutionRemoteDataSourceImpl.Companion.SYNC_TRANSACTIONS
 import com.lucaskivi.cream.institution.model.TransactionDelta
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -68,7 +69,7 @@ class InstitutionRemoteDataSourceImplTest {
         @Test
         fun `returns the transformed link token`() = runTest {
             // Setup
-            setupCallable(CREATE_LINK_TOKEN, response)
+            val callable = setupCallable(CREATE_LINK_TOKEN, response)
             every { transformer.toLinkToken(response) } returns "lt-abc"
             val expected = NetworkResult.Success("lt-abc")
 
@@ -77,24 +78,31 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
+            verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
+            verify { callable.call() }
+            verify { transformer.toLinkToken(response) }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
         fun `wraps exception in failure`() = runTest {
             // Setup
-            setupFailingCallable(CREATE_LINK_TOKEN, RuntimeException("timeout"))
+            val callable = setupFailingCallable(CREATE_LINK_TOKEN, RuntimeException("timeout"))
 
             // Test
             val result = sut.createLinkToken()
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
+            verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
+            verify { callable.call() }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
         fun `returns failure when the response can't be transformed`() = runTest {
             // Setup
-            setupCallable(CREATE_LINK_TOKEN, response)
+            val callable = setupCallable(CREATE_LINK_TOKEN, response)
             every { transformer.toLinkToken(response) } throws ClassCastException()
 
             // Test
@@ -102,6 +110,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
+            verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
+            verify { callable.call() }
+            verify { transformer.toLinkToken(response) }
+            confirmVerified(functions, callable, transformer)
         }
     }
 
@@ -129,12 +141,15 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             verify { callable.call(expectedRequest) }
+            verify { functions.getHttpsCallable(EXCHANGE_PUBLIC_TOKEN) }
+            verify { transformer.toLinkedInstitution(response, "ins_3") }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
         fun `returns the transformed institution`() = runTest {
             // Setup
-            setupCallable(EXCHANGE_PUBLIC_TOKEN, response)
+            val callable = setupCallable(EXCHANGE_PUBLIC_TOKEN, response)
             val institution = LinkedInstitution("item-1", "ins_3", "Chase")
             every { transformer.toLinkedInstitution(response, "ins_3") } returns institution
             val expected = NetworkResult.Success(institution)
@@ -148,6 +163,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
+            verify { functions.getHttpsCallable(EXCHANGE_PUBLIC_TOKEN) }
+            verify { callable.call(any()) }
+            verify { transformer.toLinkedInstitution(response, "ins_3") }
+            confirmVerified(functions, callable, transformer)
         }
     }
 
@@ -157,7 +176,7 @@ class InstitutionRemoteDataSourceImplTest {
         @Test
         fun `returns the transformed institution list`() = runTest {
             // Setup
-            setupCallable(LIST_INSTITUTIONS, response)
+            val callable = setupCallable(LIST_INSTITUTIONS, response)
             val institution = LinkedInstitutionWithAccounts(
                 institution = LinkedInstitution("item-1", "ins_3", "Chase"),
                 accounts = emptyList(),
@@ -171,6 +190,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
+            verify { functions.getHttpsCallable(LIST_INSTITUTIONS) }
+            verify { callable.call() }
+            verify { transformer.toLinkedInstitutionsWithAccounts(response) }
+            confirmVerified(functions, callable, transformer)
         }
     }
 
@@ -196,6 +219,9 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             verify { callable.call(expectedRequest) }
+            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
+            verify { transformer.toTransactionDelta(response) }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
@@ -210,12 +236,15 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             verify { callable.call(expectedRequest) }
+            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
+            verify { transformer.toTransactionDelta(response) }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
         fun `returns the transformed delta`() = runTest {
             // Setup
-            setupCallable(SYNC_TRANSACTIONS, response)
+            val callable = setupCallable(SYNC_TRANSACTIONS, response)
             every { transformer.toTransactionDelta(response) } returns delta
             val expected = NetworkResult.Success(delta)
 
@@ -224,12 +253,16 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
+            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
+            verify { callable.call(any()) }
+            verify { transformer.toTransactionDelta(response) }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
         fun `returns failure when the response can't be transformed`() = runTest {
             // Setup
-            setupCallable(SYNC_TRANSACTIONS, response)
+            val callable = setupCallable(SYNC_TRANSACTIONS, response)
             every { transformer.toTransactionDelta(response) } throws NullPointerException()
 
             // Test
@@ -237,6 +270,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
+            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
+            verify { callable.call(any()) }
+            verify { transformer.toTransactionDelta(response) }
+            confirmVerified(functions, callable, transformer)
         }
     }
 
@@ -255,18 +292,23 @@ class InstitutionRemoteDataSourceImplTest {
             // Verify
             assertTrue(result is NetworkResult.Success)
             verify { callable.call(expectedRequest) }
+            verify { functions.getHttpsCallable(DISCONNECT_INSTITUTION) }
+            confirmVerified(functions, callable, transformer)
         }
 
         @Test
         fun `wraps exception in failure`() = runTest {
             // Setup
-            setupFailingCallable(DISCONNECT_INSTITUTION, RuntimeException("server error"))
+            val callable = setupFailingCallable(DISCONNECT_INSTITUTION, RuntimeException("server error"))
 
             // Test
             val result = sut.disconnectInstitution(itemId = "item-1")
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
+            verify { functions.getHttpsCallable(DISCONNECT_INSTITUTION) }
+            verify { callable.call(any()) }
+            confirmVerified(functions, callable, transformer)
         }
     }
 }

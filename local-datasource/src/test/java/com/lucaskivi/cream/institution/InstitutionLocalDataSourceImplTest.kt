@@ -7,8 +7,10 @@ import com.lucaskivi.cream.core.institution.model.Transaction
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -45,6 +47,9 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
+            verify { dao.observeInstitutionsWithAccounts() }
+            verify { transformer.toLinkedInstitutionWithAccounts(entity) }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -66,6 +71,9 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals(domain, result)
+            verify { dao.observeAccount("acc1") }
+            verify { transformer.toFinancialAccount(entity) }
+            confirmVerified(dao, transformer)
         }
 
         @Test
@@ -80,6 +88,8 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertNull(result)
+            verify { dao.observeAccount("acc1") }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -102,6 +112,9 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
+            verify { dao.observeTransactions("acc1") }
+            verify { transformer.toTransaction(entity) }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -109,7 +122,7 @@ class InstitutionLocalDataSourceImplTest {
     inner class UpsertInstitutions {
 
         @Test
-        fun `inserts the transformed institutions if absent`() = runTest {
+        fun `inserts the transformed institutions if absent then updates each one's info`() = runTest {
             // Setup
             val domain = LinkedInstitution(
                 itemId = "item1",
@@ -125,25 +138,8 @@ class InstitutionLocalDataSourceImplTest {
             dataSource.upsertInstitutions(listOf(domain))
 
             // Verify
+            verify { transformer.toLinkedInstitutionEntity(domain) }
             coVerify { dao.insertInstitutionsIfAbsent(listOf(entity)) }
-        }
-
-        @Test
-        fun `updates each institution's info`() = runTest {
-            // Setup
-            val domain = LinkedInstitution(
-                itemId = "item1",
-                institutionId = "ins_3",
-                institutionName = "Chase",
-            )
-            every { transformer.toLinkedInstitutionEntity(domain) } returns mockk()
-            coJustRun { dao.insertInstitutionsIfAbsent(any()) }
-            coJustRun { dao.updateInstitutionInfo(any(), any(), any()) }
-
-            // Test
-            dataSource.upsertInstitutions(listOf(domain))
-
-            // Verify
             coVerify {
                 dao.updateInstitutionInfo(
                     itemId = "item1",
@@ -151,6 +147,7 @@ class InstitutionLocalDataSourceImplTest {
                     institutionName = "Chase",
                 )
             }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -170,6 +167,8 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             coVerify { dao.upsertAccounts(listOf(entity)) }
+            verify { transformer.toFinancialAccountEntity(domain) }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -189,6 +188,8 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             coVerify { dao.upsertTransactions(listOf(entity)) }
+            verify { transformer.toTransactionEntity(domain) }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -205,6 +206,7 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             coVerify { dao.deleteInstitution("item1") }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -222,6 +224,7 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             coVerify { dao.deleteTransactions(transactionIds) }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -238,6 +241,8 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             assertEquals("cursor-abc", result)
+            coVerify { dao.getTransactionCursor("item1") }
+            confirmVerified(dao, transformer)
         }
     }
 
@@ -254,6 +259,7 @@ class InstitutionLocalDataSourceImplTest {
 
             // Verify
             coVerify { dao.saveTransactionCursor("item1", "cursor-abc") }
+            confirmVerified(dao, transformer)
         }
     }
 }
