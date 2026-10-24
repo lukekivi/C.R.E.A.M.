@@ -194,11 +194,17 @@ A constructed value used in more than one place in a test (e.g. passed to the ca
 
 When the assertion itself runs the call (e.g. `assertThrows`), there is no separate Test section; the test only gets a `// Verify` section.
 
+### Confirm verified
+
+Every test that uses mocked collaborators ends its Verify section with `confirmVerified(...)` on all of them, so any call the test didn't explicitly verify fails the test. This means each test verifies every call it causes, including calls to stubbed methods.
+
+- "Collaborators" are the mocks injected into the class under test, plus mocks that model a call the class makes across a boundary (e.g. a callable reference). Mocks that only stand in for data values, and mocks of library internals (e.g. a Firebase `Task`), are left out.
+
 ```kotlin
 @Test
 fun `returns the transformed link token`() = runTest {
     // Setup
-    setupCallable(CREATE_LINK_TOKEN, response)
+    val callable = setupCallable(CREATE_LINK_TOKEN, response)
     every { transformer.toLinkToken(response) } returns "lt-abc"
     val expected = NetworkResult.Success("lt-abc")
 
@@ -207,6 +213,10 @@ fun `returns the transformed link token`() = runTest {
 
     // Verify
     assertEquals(expected, result)
+    verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
+    verify { callable.call() }
+    verify { transformer.toLinkToken(response) }
+    confirmVerified(functions, callable, transformer)
 }
 ```
 
