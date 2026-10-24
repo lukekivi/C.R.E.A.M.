@@ -19,13 +19,18 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `maps all fields`() {
+            // Setup
             val entity = LinkedInstitutionEntity(
                 itemId = "item1",
                 institutionId = "ins_3",
                 institutionName = "Chase",
                 transactionCursor = "cursor-abc",
             )
+
+            // Test
             val domain = transformer.toLinkedInstitution(entity)
+
+            // Verify
             assertEquals("item1", domain.itemId)
             assertEquals("ins_3", domain.institutionId)
             assertEquals("Chase", domain.institutionName)
@@ -37,6 +42,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `maps institution and accounts`() {
+            // Setup
             val institutionEntity = LinkedInstitutionEntity(
                 itemId = "item1",
                 institutionId = "ins_3",
@@ -58,7 +64,11 @@ class InstitutionEntityTransformerTest {
                 institution = institutionEntity,
                 accounts = listOf(accountEntity),
             )
+
+            // Test
             val domain = transformer.toLinkedInstitutionWithAccounts(relation)
+
+            // Verify
             assertEquals("item1", domain.institution.itemId)
             assertEquals("Chase", domain.institution.institutionName)
             assertEquals(1, domain.accounts.size)
@@ -68,11 +78,17 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `handles empty accounts list`() {
+            // Setup
             val relation = InstitutionWithAccountsEntity(
                 institution = LinkedInstitutionEntity("item1", "ins_3", "Chase", null),
                 accounts = emptyList(),
             )
-            assertEquals(0, transformer.toLinkedInstitutionWithAccounts(relation).accounts.size)
+
+            // Test
+            val domain = transformer.toLinkedInstitutionWithAccounts(relation)
+
+            // Verify
+            assertEquals(0, domain.accounts.size)
         }
     }
 
@@ -81,6 +97,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `maps all fields including type`() {
+            // Setup
             val entity = FinancialAccountEntity(
                 accountId = "acc1",
                 itemId = "item1",
@@ -92,7 +109,11 @@ class InstitutionEntityTransformerTest {
                 balanceAvailable = 950.0,
                 isoCurrencyCode = "USD",
             )
+
+            // Test
             val domain = transformer.toFinancialAccount(entity)
+
+            // Verify
             assertEquals("acc1", domain.accountId)
             assertEquals("item1", domain.itemId)
             assertEquals("Total Checking", domain.displayName)
@@ -106,6 +127,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `returns OTHER for unknown type string`() {
+            // Setup
             val entity = FinancialAccountEntity(
                 accountId = "acc1",
                 itemId = "item1",
@@ -117,11 +139,17 @@ class InstitutionEntityTransformerTest {
                 balanceAvailable = null,
                 isoCurrencyCode = null,
             )
-            assertEquals(FinancialAccountType.OTHER, transformer.toFinancialAccount(entity).type)
+
+            // Test
+            val domain = transformer.toFinancialAccount(entity)
+
+            // Verify
+            assertEquals(FinancialAccountType.OTHER, domain.type)
         }
 
         @Test
         fun `handles null optional fields`() {
+            // Setup
             val entity = FinancialAccountEntity(
                 accountId = "acc2",
                 itemId = "item2",
@@ -133,7 +161,11 @@ class InstitutionEntityTransformerTest {
                 balanceAvailable = null,
                 isoCurrencyCode = null,
             )
+
+            // Test
             val domain = transformer.toFinancialAccount(entity)
+
+            // Verify
             assertNull(domain.mask)
             assertNull(domain.subtype)
             assertNull(domain.balanceCurrent)
@@ -147,6 +179,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `maps all fields`() {
+            // Setup
             val date = LocalDate.of(2024, 3, 15)
             val entity = TransactionEntity(
                 transactionId = "tx1",
@@ -159,7 +192,11 @@ class InstitutionEntityTransformerTest {
                 pending = false,
                 category = "Food and Drink",
             )
+
+            // Test
             val domain = transformer.toTransaction(entity)
+
+            // Verify
             assertEquals("tx1", domain.transactionId)
             assertEquals("acc1", domain.accountId)
             assertEquals(12.50, domain.amount, 0.0)
@@ -173,6 +210,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `handles null optional fields`() {
+            // Setup
             val entity = TransactionEntity(
                 transactionId = "tx2",
                 accountId = "acc1",
@@ -184,7 +222,11 @@ class InstitutionEntityTransformerTest {
                 pending = true,
                 category = null,
             )
+
+            // Test
             val domain = transformer.toTransaction(entity)
+
+            // Verify
             assertNull(domain.isoCurrencyCode)
             assertNull(domain.merchantName)
             assertNull(domain.category)
@@ -196,12 +238,17 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `maps all fields with a null transaction cursor`() {
+            // Setup
             val domain = LinkedInstitution(
                 itemId = "item1",
                 institutionId = "ins_3",
                 institutionName = "Chase",
             )
+
+            // Test
             val entity = transformer.toLinkedInstitutionEntity(domain)
+
+            // Verify
             assertEquals("item1", entity.itemId)
             assertEquals("ins_3", entity.institutionId)
             assertEquals("Chase", entity.institutionName)
@@ -210,13 +257,19 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `round-trips through toLinkedInstitution`() {
+            // Setup
             val original = LinkedInstitution(
                 itemId = "item1",
                 institutionId = "ins_3",
                 institutionName = "Chase",
             )
+
+            // Test
             val entity = transformer.toLinkedInstitutionEntity(original)
-            assertEquals(original, transformer.toLinkedInstitution(entity))
+            val roundTripped = transformer.toLinkedInstitution(entity)
+
+            // Verify
+            assertEquals(original, roundTripped)
         }
     }
 
@@ -225,6 +278,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `stores type as enum name`() {
+            // Setup
             val domain = FinancialAccount(
                 accountId = "acc1",
                 itemId = "item1",
@@ -236,12 +290,18 @@ class InstitutionEntityTransformerTest {
                 balanceAvailable = null,
                 isoCurrencyCode = null,
             )
-            assertEquals("CREDIT", transformer.toFinancialAccountEntity(domain).type)
+
+            // Test
+            val entity = transformer.toFinancialAccountEntity(domain)
+
+            // Verify
+            assertEquals("CREDIT", entity.type)
         }
 
         @Test
         fun `round-trips through toFinancialAccount for every type`() {
             for (type in FinancialAccountType.entries) {
+                // Setup
                 val original = FinancialAccount(
                     accountId = "acc",
                     itemId = "item",
@@ -253,8 +313,13 @@ class InstitutionEntityTransformerTest {
                     balanceAvailable = null,
                     isoCurrencyCode = null,
                 )
+
+                // Test
                 val entity = transformer.toFinancialAccountEntity(original)
-                assertEquals(original, transformer.toFinancialAccount(entity), "Round-trip failed for $type")
+                val roundTripped = transformer.toFinancialAccount(entity)
+
+                // Verify
+                assertEquals(original, roundTripped, "Round-trip failed for $type")
             }
         }
     }
@@ -264,6 +329,7 @@ class InstitutionEntityTransformerTest {
 
         @Test
         fun `round-trips through toTransaction`() {
+            // Setup
             val original = Transaction(
                 transactionId = "tx1",
                 accountId = "acc1",
@@ -275,8 +341,13 @@ class InstitutionEntityTransformerTest {
                 pending = false,
                 category = "Food and Drink",
             )
+
+            // Test
             val entity = transformer.toTransactionEntity(original)
-            assertEquals(original, transformer.toTransaction(entity))
+            val roundTripped = transformer.toTransaction(entity)
+
+            // Verify
+            assertEquals(original, roundTripped)
         }
     }
 }

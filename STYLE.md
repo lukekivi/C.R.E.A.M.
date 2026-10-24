@@ -182,6 +182,34 @@ class InstitutionTransformerTest {
 }
 ```
 
+### Setup / Test / Verify
+
+Split every test body into `// Setup`, `// Test`, and `// Verify` sections, separated by a blank line, so a reviewer can see at a glance what is arranged, what is exercised, and what is checked. Leave out any section that would be empty.
+
+- **Setup**: fixtures, mocks, stubs, and expected values. Any expected value that involves construction (e.g. `NetworkResult.Success("lt-abc")`, `listOf(domain)`, `LocalDate.of(...)`) goes in an `expected` val (or `expected<Thing>` when there are several) rather than inline in an assertion.
+- **Test**: the call(s) under test. Capture results in a `val` instead of calling inside an assertion.
+- **Verify**: assertions and `verify`/`coVerify` calls.
+
+A constructed value used in more than one place in a test (e.g. passed to the call under test and checked in a `verify`) goes in a `val` in Setup, or is read back from the fixture that already holds it (e.g. `delta.removedIds`).
+
+When the assertion itself runs the call (e.g. `assertThrows`), there is no separate Test section; the test only gets a `// Verify` section.
+
+```kotlin
+@Test
+fun `returns the transformed link token`() = runTest {
+    // Setup
+    setupCallable(CREATE_LINK_TOKEN, response)
+    every { transformer.toLinkToken(response) } returns "lt-abc"
+    val expected = NetworkResult.Success("lt-abc")
+
+    // Test
+    val result = dataSource.createLinkToken()
+
+    // Verify
+    assertEquals(expected, result)
+}
+```
+
 ## Module / layer boundaries
 
 Each module owns its implementation behind a factory function that returns the interface type. Consumers call the factory; they never import the impl class directly.
