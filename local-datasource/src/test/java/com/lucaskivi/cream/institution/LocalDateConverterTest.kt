@@ -15,12 +15,20 @@ class LocalDateConverterTest {
 
         @Test
         fun `converts date to ISO-8601 string`() {
-            assertEquals("2024-03-15", converter.fromLocalDate(LocalDate.of(2024, 3, 15)))
+            // Test
+            val result = converter.fromLocalDate(LocalDate.of(2024, 3, 15))
+
+            // Verify
+            assertEquals("2024-03-15", result)
         }
 
         @Test
         fun `returns null for null input`() {
-            assertNull(converter.fromLocalDate(null))
+            // Test
+            val result = converter.fromLocalDate(null)
+
+            // Verify
+            assertNull(result)
         }
     }
 
@@ -29,12 +37,23 @@ class LocalDateConverterTest {
 
         @Test
         fun `parses ISO-8601 string to LocalDate`() {
-            assertEquals(LocalDate.of(2024, 3, 15), converter.toLocalDate("2024-03-15"))
+            // Setup
+            val expected = LocalDate.of(2024, 3, 15)
+
+            // Test
+            val result = converter.toLocalDate("2024-03-15")
+
+            // Verify
+            assertEquals(expected, result)
         }
 
         @Test
         fun `returns null for null input`() {
-            assertNull(converter.toLocalDate(null))
+            // Test
+            val result = converter.toLocalDate(null)
+
+            // Verify
+            assertNull(result)
         }
     }
 
@@ -43,8 +62,14 @@ class LocalDateConverterTest {
 
         @Test
         fun `fromLocalDate then toLocalDate returns original date`() {
+            // Setup
             val original = LocalDate.of(2024, 12, 31)
-            assertEquals(original, converter.toLocalDate(converter.fromLocalDate(original)))
+
+            // Test
+            val result = converter.toLocalDate(converter.fromLocalDate(original))
+
+            // Verify
+            assertEquals(original, result)
         }
     }
 }

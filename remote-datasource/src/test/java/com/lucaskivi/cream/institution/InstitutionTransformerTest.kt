@@ -17,7 +17,11 @@ class InstitutionTransformerTest {
 
         @Test
         fun `returns the link token`() {
-            assertEquals("lt-abc", transformer.toLinkToken(mapOf("linkToken" to "lt-abc")))
+            // Test
+            val linkToken = transformer.toLinkToken(mapOf("linkToken" to "lt-abc"))
+
+            // Verify
+            assertEquals("lt-abc", linkToken)
         }
     }
 
@@ -26,10 +30,13 @@ class InstitutionTransformerTest {
 
         @Test
         fun `combines response fields with the selected institution id`() {
+            // Test
             val institution = transformer.toLinkedInstitution(
                 response = mapOf("itemId" to "item-1", "institutionName" to "Chase"),
                 institutionId = "ins_3",
             )
+
+            // Verify
             assertEquals("item-1", institution.itemId)
             assertEquals("ins_3", institution.institutionId)
             assertEquals("Chase", institution.institutionName)
@@ -41,26 +48,46 @@ class InstitutionTransformerTest {
 
         @Test
         fun `maps known type strings`() {
-            assertEquals(FinancialAccountType.DEPOSITORY, transformer.toFinancialAccountType("depository"))
-            assertEquals(FinancialAccountType.CREDIT, transformer.toFinancialAccountType("credit"))
-            assertEquals(FinancialAccountType.LOAN, transformer.toFinancialAccountType("loan"))
-            assertEquals(FinancialAccountType.INVESTMENT, transformer.toFinancialAccountType("investment"))
+            // Test
+            val depository = transformer.toFinancialAccountType("depository")
+            val credit = transformer.toFinancialAccountType("credit")
+            val loan = transformer.toFinancialAccountType("loan")
+            val investment = transformer.toFinancialAccountType("investment")
+
+            // Verify
+            assertEquals(FinancialAccountType.DEPOSITORY, depository)
+            assertEquals(FinancialAccountType.CREDIT, credit)
+            assertEquals(FinancialAccountType.LOAN, loan)
+            assertEquals(FinancialAccountType.INVESTMENT, investment)
         }
 
         @Test
         fun `is case-insensitive`() {
-            assertEquals(FinancialAccountType.DEPOSITORY, transformer.toFinancialAccountType("DEPOSITORY"))
-            assertEquals(FinancialAccountType.CREDIT, transformer.toFinancialAccountType("Credit"))
+            // Test
+            val upperCase = transformer.toFinancialAccountType("DEPOSITORY")
+            val titleCase = transformer.toFinancialAccountType("Credit")
+
+            // Verify
+            assertEquals(FinancialAccountType.DEPOSITORY, upperCase)
+            assertEquals(FinancialAccountType.CREDIT, titleCase)
         }
 
         @Test
         fun `returns OTHER for unknown string`() {
-            assertEquals(FinancialAccountType.OTHER, transformer.toFinancialAccountType("brokerage"))
+            // Test
+            val type = transformer.toFinancialAccountType("brokerage")
+
+            // Verify
+            assertEquals(FinancialAccountType.OTHER, type)
         }
 
         @Test
         fun `returns OTHER for null`() {
-            assertEquals(FinancialAccountType.OTHER, transformer.toFinancialAccountType(null))
+            // Test
+            val type = transformer.toFinancialAccountType(null)
+
+            // Verify
+            assertEquals(FinancialAccountType.OTHER, type)
         }
     }
 
@@ -69,6 +96,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `maps all fields correctly`() {
+            // Setup
             val map = mapOf(
                 "transactionId" to "tx1",
                 "accountId" to "acc1",
@@ -80,12 +108,17 @@ class InstitutionTransformerTest {
                 "pending" to false,
                 "category" to "Food and Drink",
             )
+            val expectedDate = LocalDate.of(2024, 3, 15)
+
+            // Test
             val tx = transformer.toTransaction(map)
+
+            // Verify
             assertEquals("tx1", tx.transactionId)
             assertEquals("acc1", tx.accountId)
             assertEquals(12.50, tx.amount, 0.0)
             assertEquals("USD", tx.isoCurrencyCode)
-            assertEquals(LocalDate.of(2024, 3, 15), tx.date)
+            assertEquals(expectedDate, tx.date)
             assertEquals("Coffee Shop", tx.name)
             assertEquals("Blue Bottle", tx.merchantName)
             assertEquals(false, tx.pending)
@@ -94,6 +127,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `handles nullable fields absent`() {
+            // Setup
             val map = mapOf(
                 "transactionId" to "tx2",
                 "accountId" to "acc2",
@@ -105,7 +139,11 @@ class InstitutionTransformerTest {
                 "pending" to true,
                 "category" to null,
             )
+
+            // Test
             val tx = transformer.toTransaction(map)
+
+            // Verify
             assertNull(tx.isoCurrencyCode)
             assertNull(tx.merchantName)
             assertNull(tx.category)
@@ -118,6 +156,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `maps all fields correctly`() {
+            // Setup
             val balance = mapOf(
                 "current" to 1000.0,
                 "available" to 950.0,
@@ -131,7 +170,11 @@ class InstitutionTransformerTest {
                 "subtype" to "checking",
                 "balance" to balance,
             )
+
+            // Test
             val account = transformer.toFinancialAccount(map, "item1")
+
+            // Verify
             assertEquals("acc1", account.accountId)
             assertEquals("item1", account.itemId)
             assertEquals("Total Checking", account.displayName)
@@ -145,6 +188,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `handles null optional fields`() {
+            // Setup
             val balance = mapOf<String, Any?>(
                 "current" to null,
                 "available" to null,
@@ -158,7 +202,11 @@ class InstitutionTransformerTest {
                 "subtype" to null,
                 "balance" to balance,
             )
+
+            // Test
             val account = transformer.toFinancialAccount(map, "item2")
+
+            // Verify
             assertNull(account.mask)
             assertEquals(FinancialAccountType.OTHER, account.type)
             assertNull(account.subtype)
@@ -173,6 +221,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `maps added, modified, removed, and cursor`() {
+            // Setup
             fun txMap(id: String) = mapOf(
                 "transactionId" to id,
                 "accountId" to "acc1",
@@ -190,24 +239,34 @@ class InstitutionTransformerTest {
                 "removed" to listOf(mapOf("transactionId" to "r1")),
                 "cursor" to "cursor-xyz",
             )
+            val expectedRemovedIds = listOf("r1")
+
+            // Test
             val delta = transformer.toTransactionDelta(map)
+
+            // Verify
             assertEquals(1, delta.added.size)
             assertEquals("a1", delta.added[0].transactionId)
             assertEquals(1, delta.modified.size)
             assertEquals("m1", delta.modified[0].transactionId)
-            assertEquals(listOf("r1"), delta.removedIds)
+            assertEquals(expectedRemovedIds, delta.removedIds)
             assertEquals("cursor-xyz", delta.nextCursor)
         }
 
         @Test
         fun `handles empty buckets`() {
+            // Setup
             val map = mapOf(
                 "added" to emptyList<Map<String, Any?>>(),
                 "modified" to emptyList<Map<String, Any?>>(),
                 "removed" to emptyList<Map<String, Any?>>(),
                 "cursor" to "cursor-abc",
             )
+
+            // Test
             val delta = transformer.toTransactionDelta(map)
+
+            // Verify
             assertEquals(0, delta.added.size)
             assertEquals(0, delta.modified.size)
             assertEquals(0, delta.removedIds.size)
@@ -216,12 +275,15 @@ class InstitutionTransformerTest {
 
         @Test
         fun `throws when a removed entry lacks transactionId`() {
+            // Setup
             val map = mapOf(
                 "added" to emptyList<Map<String, Any?>>(),
                 "modified" to emptyList<Map<String, Any?>>(),
                 "removed" to listOf(mapOf("id" to "r1")),
                 "cursor" to "cursor-abc",
             )
+
+            // Verify
             assertThrows<NullPointerException> { transformer.toTransactionDelta(map) }
         }
     }
@@ -231,6 +293,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `maps institution and accounts`() {
+            // Setup
             val balance = mapOf<String, Any?>(
                 "current" to 500.0,
                 "available" to null,
@@ -250,7 +313,11 @@ class InstitutionTransformerTest {
                 "institutionName" to "Chase",
                 "accounts" to listOf(account),
             )
+
+            // Test
             val result = transformer.toLinkedInstitutionWithAccounts(map)
+
+            // Verify
             assertEquals("item1", result.institution.itemId)
             assertEquals("ins_3", result.institution.institutionId)
             assertEquals("Chase", result.institution.institutionName)
@@ -265,6 +332,7 @@ class InstitutionTransformerTest {
 
         @Test
         fun `maps every institution in the response`() {
+            // Setup
             fun institution(itemId: String) = mapOf(
                 "itemId" to itemId,
                 "institutionId" to "ins_3",
@@ -272,14 +340,26 @@ class InstitutionTransformerTest {
                 "accounts" to emptyList<Map<String, Any?>>(),
             )
             val response = mapOf("institutions" to listOf(institution("item1"), institution("item2")))
+            val expected = listOf("item1", "item2")
+
+            // Test
             val result = transformer.toLinkedInstitutionsWithAccounts(response)
-            assertEquals(listOf("item1", "item2"), result.map { it.institution.itemId })
+
+            // Verify
+            assertEquals(expected, result.map { it.institution.itemId })
         }
 
         @Test
         fun `returns empty list when nothing is linked`() {
+            // Setup
             val response = mapOf("institutions" to emptyList<Map<String, Any?>>())
-            assertEquals(emptyList<Any>(), transformer.toLinkedInstitutionsWithAccounts(response))
+            val expected = emptyList<Any>()
+
+            // Test
+            val result = transformer.toLinkedInstitutionsWithAccounts(response)
+
+            // Verify
+            assertEquals(expected, result)
         }
     }
 }
