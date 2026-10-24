@@ -199,6 +199,7 @@ When the assertion itself runs the call (e.g. `assertThrows`), there is no separ
 Every test that uses mocked collaborators ends its Verify section with `confirmVerified(...)` on all of them, so any call the test didn't explicitly verify fails the test. This means each test verifies every call it causes, including calls to stubbed methods.
 
 - "Collaborators" are the mocks injected into the class under test, plus mocks that model a call the class makes across a boundary (e.g. a callable reference). Mocks that only stand in for data values, and mocks of library internals (e.g. a Firebase `Task`), are left out.
+- Verify all expected calls in a single `verify { }` block, listed in the order they happen. Use `coVerify` if any of them suspends. Only split into another block when the verification parameters differ, e.g. `coVerify(exactly = 0) { }` for calls that must not happen.
 
 ```kotlin
 @Test
@@ -213,9 +214,11 @@ fun `returns the transformed link token`() = runTest {
 
     // Verify
     assertEquals(expected, result)
-    verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
-    verify { callable.call() }
-    verify { transformer.toLinkToken(response) }
+    verify {
+        functions.getHttpsCallable(CREATE_LINK_TOKEN)
+        callable.call()
+        transformer.toLinkToken(response)
+    }
     confirmVerified(functions, callable, transformer)
 }
 ```

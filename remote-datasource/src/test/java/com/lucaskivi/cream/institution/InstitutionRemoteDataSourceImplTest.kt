@@ -78,9 +78,11 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
-            verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
-            verify { callable.call() }
-            verify { transformer.toLinkToken(response) }
+            verify {
+                functions.getHttpsCallable(CREATE_LINK_TOKEN)
+                callable.call()
+                transformer.toLinkToken(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -94,8 +96,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
-            verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
-            verify { callable.call() }
+            verify {
+                functions.getHttpsCallable(CREATE_LINK_TOKEN)
+                callable.call()
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -110,9 +114,11 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
-            verify { functions.getHttpsCallable(CREATE_LINK_TOKEN) }
-            verify { callable.call() }
-            verify { transformer.toLinkToken(response) }
+            verify {
+                functions.getHttpsCallable(CREATE_LINK_TOKEN)
+                callable.call()
+                transformer.toLinkToken(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
     }
@@ -140,9 +146,11 @@ class InstitutionRemoteDataSourceImplTest {
             )
 
             // Verify
-            verify { callable.call(expectedRequest) }
-            verify { functions.getHttpsCallable(EXCHANGE_PUBLIC_TOKEN) }
-            verify { transformer.toLinkedInstitution(response, "ins_3") }
+            verify {
+                functions.getHttpsCallable(EXCHANGE_PUBLIC_TOKEN)
+                callable.call(expectedRequest)
+                transformer.toLinkedInstitution(response, "ins_3")
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -163,9 +171,11 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
-            verify { functions.getHttpsCallable(EXCHANGE_PUBLIC_TOKEN) }
-            verify { callable.call(any()) }
-            verify { transformer.toLinkedInstitution(response, "ins_3") }
+            verify {
+                functions.getHttpsCallable(EXCHANGE_PUBLIC_TOKEN)
+                callable.call(any())
+                transformer.toLinkedInstitution(response, "ins_3")
+            }
             confirmVerified(functions, callable, transformer)
         }
     }
@@ -190,9 +200,11 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
-            verify { functions.getHttpsCallable(LIST_INSTITUTIONS) }
-            verify { callable.call() }
-            verify { transformer.toLinkedInstitutionsWithAccounts(response) }
+            verify {
+                functions.getHttpsCallable(LIST_INSTITUTIONS)
+                callable.call()
+                transformer.toLinkedInstitutionsWithAccounts(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
     }
@@ -218,9 +230,11 @@ class InstitutionRemoteDataSourceImplTest {
             sut.syncTransactions(itemId = "item-1", cursor = "cursor-prev")
 
             // Verify
-            verify { callable.call(expectedRequest) }
-            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
-            verify { transformer.toTransactionDelta(response) }
+            verify {
+                functions.getHttpsCallable(SYNC_TRANSACTIONS)
+                callable.call(expectedRequest)
+                transformer.toTransactionDelta(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -235,9 +249,11 @@ class InstitutionRemoteDataSourceImplTest {
             sut.syncTransactions(itemId = "item-1", cursor = null)
 
             // Verify
-            verify { callable.call(expectedRequest) }
-            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
-            verify { transformer.toTransactionDelta(response) }
+            verify {
+                functions.getHttpsCallable(SYNC_TRANSACTIONS)
+                callable.call(expectedRequest)
+                transformer.toTransactionDelta(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -253,9 +269,11 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertEquals(expected, result)
-            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
-            verify { callable.call(any()) }
-            verify { transformer.toTransactionDelta(response) }
+            verify {
+                functions.getHttpsCallable(SYNC_TRANSACTIONS)
+                callable.call(any())
+                transformer.toTransactionDelta(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -270,9 +288,11 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
-            verify { functions.getHttpsCallable(SYNC_TRANSACTIONS) }
-            verify { callable.call(any()) }
-            verify { transformer.toTransactionDelta(response) }
+            verify {
+                functions.getHttpsCallable(SYNC_TRANSACTIONS)
+                callable.call(any())
+                transformer.toTransactionDelta(response)
+            }
             confirmVerified(functions, callable, transformer)
         }
     }
@@ -291,8 +311,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Success)
-            verify { callable.call(expectedRequest) }
-            verify { functions.getHttpsCallable(DISCONNECT_INSTITUTION) }
+            verify {
+                functions.getHttpsCallable(DISCONNECT_INSTITUTION)
+                callable.call(expectedRequest)
+            }
             confirmVerified(functions, callable, transformer)
         }
 
@@ -306,8 +328,10 @@ class InstitutionRemoteDataSourceImplTest {
 
             // Verify
             assertTrue(result is NetworkResult.Failure)
-            verify { functions.getHttpsCallable(DISCONNECT_INSTITUTION) }
-            verify { callable.call(any()) }
+            verify {
+                functions.getHttpsCallable(DISCONNECT_INSTITUTION)
+                callable.call(any())
+            }
             confirmVerified(functions, callable, transformer)
         }
     }
