@@ -14,7 +14,7 @@ Data flows up: Datasource → Repository → ViewModel → Composable.
 
 ## Code style
 
-See [STYLE.md](STYLE.md) for code conventions (documentation, formatting, module boundaries). Follow it for every change.
+See [STYLE.md](STYLE.md) for code conventions (documentation, formatting, module boundaries). Follow it for every change. Every PR is checked against it by an automated style reviewer; see [docs/style-review.md](docs/style-review.md).
 
 ## Work tracking
 

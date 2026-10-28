@@ -1,0 +1,21 @@
+{
+  "description": "One ViewModel file breaking most formatting, KDoc, ViewModel, and module rules.",
+  "expected": [
+    {"what": "impl imported instead of the module factory", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [4, 4]},
+    {"what": "UiState above the ViewModel", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [10, 15]},
+    {"what": "single-line ViewModel constructor", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [22, 22]},
+    {"what": "companion object not last", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 29]},
+    {"what": "missing KDoc", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 24]},
+    {"what": "single-line KDoc", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [31, 31]},
+    {"what": "underscore backing property", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [32, 32]},
+    {"what": "missing @param", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [39, 42]},
+    {"what": "parameters not one per line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [42, 42]},
+    {"what": "expression body on the header line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [42, 42]},
+    {"what": "method chain on one line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [49, 50]},
+    {"what": "missing KDoc", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [52, 53]}
+  ],
+  "allowed": [
+    {"what": ":app reaching past :data", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [4, 4], "why": "The impl import also reaches past :data; one finding for the import is enough."},
+    {"source": ".claude/skills/cream-viewmodel/SKILL.md", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 29], "why": "The cream-viewmodel skill gives every ViewModel a companion factory; this one has none. A valid skill-sourced finding, but not what the case plants."}
+  ]
+}
