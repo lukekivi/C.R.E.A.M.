@@ -1,0 +1,79 @@
+{
+  "title": "Style review",
+  "description": "Findings from a style review. An empty findings array is a valid, expected result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings", "newCategories", "notes"],
+  "properties": {
+    "findings": {
+      "description": "Ordered by importance, most important first. One finding per convention broken: when a line breaks several, report each separately rather than mentioning the others in one message. Report each violation once, where it's declared, not at usages that would change as a consequence (e.g. references to a renamed property).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "file", "line", "message"],
+        "properties": {
+          "category": {
+            "description": "The id of a known category, or of one defined in newCategories.",
+            "type": "string"
+          },
+          "file": {
+            "description": "Repo-relative path of the file.",
+            "type": "string"
+          },
+          "line": {
+            "description": "First line of the violation in the new version of the file. Take it from the file itself, never by counting through diff hunks.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "endLine": {
+            "description": "Last line of the violation, only when it differs from line.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "message": {
+            "description": "One sentence saying what is wrong here.",
+            "type": "string"
+          },
+          "suggestion": {
+            "description": "Only when the fix is mechanical: the complete replacement for lines line through endLine, with indentation. Whole lines only. When several findings cover the same lines, put one combined suggestion on the first and omit it from the rest.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "newCategories": {
+      "description": "Categories used by findings that no known category fits. Empty when every finding reuses a known one.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "source", "mechanical"],
+        "properties": {
+          "id": {
+            "description": "Short kebab-case name for the kind of issue, not for this occurrence, e.g. kdoc-single-line.",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "description": {
+            "description": "What the issue is and what conforming code looks like, in general terms that apply beyond this diff. Detailed enough that someone could write a lint rule or a doc fix from it.",
+            "type": "string"
+          },
+          "source": {
+            "description": "The repo-relative path of the doc or skill that states the convention, or 'codebase' when it's only evident from existing code.",
+            "type": "string"
+          },
+          "mechanical": {
+            "description": "Whether a linter could detect the issue reliably from the code alone.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "notes": {
+      "description": "Conventions that conflicted or were unclear for this code. Nothing else. They're tallied to find conventions that need clearer documentation.",
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}
