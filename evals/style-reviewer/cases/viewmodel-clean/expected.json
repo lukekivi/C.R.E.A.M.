@@ -1,0 +1,5 @@
+{
+  "description": "The same ViewModel written to STYLE.md. Any finding is a false positive.",
+  "expected": [],
+  "allowed": []
+}

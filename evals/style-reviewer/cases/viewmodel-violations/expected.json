@@ -1,0 +1,21 @@
+{
+  "description": "One ViewModel file breaking most formatting, KDoc, ViewModel, and module rules.",
+  "expected": [
+    {"convention": "MODULE-FACTORY", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [4, 4]},
+    {"convention": "UISTATE-BELOW-VM", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [10, 15]},
+    {"convention": "VM-CONSTRUCTOR", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [22, 22]},
+    {"convention": "COMPANION-LAST", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 29]},
+    {"convention": "KDOC-REQUIRED", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 24]},
+    {"convention": "KDOC-MULTILINE", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [31, 31]},
+    {"convention": "BACKING-PROPERTY", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [32, 32]},
+    {"convention": "KDOC-PARAM", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [39, 42]},
+    {"convention": "PARAMS-PER-LINE", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [42, 42]},
+    {"convention": "EXPRESSION-BODY", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [42, 42]},
+    {"convention": "METHOD-CHAIN", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [49, 50]},
+    {"convention": "KDOC-REQUIRED", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [52, 53]}
+  ],
+  "allowed": [
+    {"convention": "MODULE-APP-DATA-ONLY", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [4, 4], "why": "The impl import breaks this and MODULE-FACTORY at once; one finding for the import is enough."},
+    {"source": ".claude/skills/cream-viewmodel/SKILL.md", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 29], "why": "The cream-viewmodel skill gives every ViewModel a companion factory; this one has none. A valid skill-sourced finding, but not what the case plants."}
+  ]
+}
