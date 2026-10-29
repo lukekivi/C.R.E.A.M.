@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "reviewedAt": "2026-10-29T13:23:07Z",
+  "pr": 5,
+  "branch": "feat/cream-010-style-reviewer-agent",
+  "base": "8a264c173cc1e501e12582bad323ad52625f4f96",
+  "head": "69acc65bf8bced4a6b05c4463ee7492e6a4e7eae",
+  "model": "claude-sonnet-5-5",
+  "authorship": {
+    "commits": 2,
+    "claudeCoAuthored": 2
+  },
+  "findings": [],
+  "notes": []
+}
