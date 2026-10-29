@@ -1,0 +1,55 @@
+{
+  "title": "Style review",
+  "description": "Findings from a style review. An empty findings array is a valid, expected result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings", "notes"],
+  "properties": {
+    "findings": {
+      "description": "One finding per convention broken: when a line breaks several, report each separately rather than mentioning the others in one message. Report each violation once, where it's declared, not at usages that would change as a consequence (e.g. references to a renamed property).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["convention", "source", "file", "line", "message"],
+        "properties": {
+          "convention": {
+            "description": "A short name for the convention broken. Use the source's own label when it has one (e.g. a STYLE.md rule ID such as KDOC-MULTILINE); otherwise a kebab-case name. Findings are tallied by convention and source, so name them consistently.",
+            "type": "string"
+          },
+          "source": {
+            "description": "The repo-relative path of the doc or skill that states the convention, or 'codebase' when it's only evident from existing code.",
+            "type": "string"
+          },
+          "file": {
+            "description": "Repo-relative path of the file.",
+            "type": "string"
+          },
+          "line": {
+            "description": "First line of the violation in the new version of the file. Take it from the file itself, never by counting through diff hunks.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "endLine": {
+            "description": "Last line of the violation, only when it differs from line.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "message": {
+            "description": "One sentence saying what is wrong.",
+            "type": "string"
+          },
+          "suggestion": {
+            "description": "Only when the fix is mechanical: the complete replacement for lines line through endLine, with indentation. Whole lines only. When several findings cover the same lines, put one combined suggestion on the first and omit it from the rest.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "description": "Conventions that conflicted or were unclear for this code, each starting with the convention's name. Nothing else. They're tallied to find conventions that need clearer documentation.",
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

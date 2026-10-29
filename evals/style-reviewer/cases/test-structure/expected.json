@@ -1,0 +1,11 @@
+{
+  "description": "A test breaking the test-structure rules. Test sources are exempt from KDOC-REQUIRED, so flagging the undocumented class or property is a false positive.",
+  "expected": [
+    {"convention": "TEST-NESTED", "file": "remote-datasource/src/test/java/com/lucaskivi/cream/institution/FixtureDataSourceTest.kt", "lines": [14, 24]},
+    {"convention": "TEST-SECTIONS", "file": "remote-datasource/src/test/java/com/lucaskivi/cream/institution/FixtureDataSourceTest.kt", "lines": [17, 22]},
+    {"convention": "TEST-CONFIRM-VERIFIED", "file": "remote-datasource/src/test/java/com/lucaskivi/cream/institution/FixtureDataSourceTest.kt", "lines": [17, 22]}
+  ],
+  "allowed": [
+    {"convention": "EXPRESSION-BODY", "file": "remote-datasource/src/test/java/com/lucaskivi/cream/institution/FixtureDataSourceTest.kt", "lines": [17, 17], "why": "STYLE.md's own test example uses '= runTest {' on one line, so the rule is ambiguous for tests."}
+  ]
+}

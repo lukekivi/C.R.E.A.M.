@@ -16,3 +16,4 @@ functions/lib/
 .firebase/
 firebase-debug.log
 firestore-debug.log
+__pycache__/

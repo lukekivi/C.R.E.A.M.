@@ -1,0 +1,11 @@
+{
+  "description": "Semantic KDoc rules: a vendor name on a vendor-neutral :core model, and implementation details in a public contract. The undocumented override is exempt, so flagging it is a false positive.",
+  "expected": [
+    {"convention": "KDOC-VENDOR", "file": "core/src/main/java/com/lucaskivi/cream/core/institution/model/FixtureBalance.kt", "lines": [3, 7]},
+    {"convention": "KDOC-CONTRACT", "file": "remote-datasource/src/main/java/com/lucaskivi/cream/institution/FixtureBalanceSource.kt", "lines": [10, 16]}
+  ],
+  "allowed": [
+    {"convention": "KDOC-VENDOR", "file": "remote-datasource/src/main/java/com/lucaskivi/cream/institution/FixtureBalanceSource.kt", "lines": [10, 16], "why": "Whether a :remote-datasource interface counts as vendor-neutral is a judgment call."},
+    {"convention": "MODULE-FACTORY", "file": "remote-datasource/src/main/java/com/lucaskivi/cream/institution/FixtureBalanceSource.kt", "lines": [24, 30], "why": "The fixture Impl has no factory function. A real inconsistency, but not what the case plants."}
+  ]
+}
