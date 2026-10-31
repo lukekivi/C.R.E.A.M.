@@ -1,0 +1,27 @@
+#!/bin/sh
+# Commit message rules (see CLAUDE.md § Commits):
+#   - a subject line, a blank line, then a 3-line haiku as the whole body
+#   - no Claude / Anthropic Co-Authored-By trailer
+# Enable once per clone: git config core.hooksPath .githooks
+
+msg_file="$1"
+
+# Drop Claude attribution trailers instead of failing on them.
+sed -i.bak -E '/^[Cc]o-[Aa]uthored-[Bb]y:.*([Cc]laude|[Aa]nthropic)/d' "$msg_file" && rm -f "$msg_file.bak"
+
+# Lines git will keep: no comments, no trailing blank lines.
+cleaned=$(grep -v '^#' "$msg_file" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+subject=$(printf '%s\n' "$cleaned" | sed -n 1p)
+
+case "$subject" in
+    fixup!*|squash!*|amend!*|Merge*|Revert*) exit 0 ;;
+esac
+
+separator=$(printf '%s\n' "$cleaned" | sed -n 2p)
+body_lines=$(printf '%s\n' "$cleaned" | sed -n '3,$p' | grep -c .)
+total_lines=$(printf '%s\n' "$cleaned" | wc -l | tr -d ' ')
+
+if [ -n "$separator" ] || [ "$body_lines" -ne 3 ] || [ "$total_lines" -ne 5 ]; then
+    echo "commit-msg: the body must be a 3-line haiku (5-7-5) after one blank line." >&2
+    exit 1
+fi
