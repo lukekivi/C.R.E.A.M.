@@ -6,6 +6,8 @@ See [STYLE.md](STYLE.md) for code conventions (documentation, formatting, module
 
 See [docs/work-tracking.md](docs/work-tracking.md) for how work is tracked (epics and tickets live in [docs/specs/](docs/specs/)).
 
+Commit messages are a subject line plus a 3-line haiku body. Enable the hook that checks this once per clone: `git config core.hooksPath .githooks`.
+
 ## Architecture
 
 ### Layering
