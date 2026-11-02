@@ -14,7 +14,7 @@ Correctness, design, and security review are not this reviewer's job.
 - `.claude/agents/style-reviewer.md` — the reviewer, runnable locally and in CI.
 - `.github/workflows/` — the PR-triggered workflow.
 - The category database and the report that turns recurring categories into remediation proposals.
-- A small pointer in CLAUDE.md.
+- A small pointer in AGENTS.md.
 
 See [docs/style-review.md](../../style-review.md) for how the pieces fit together.
 

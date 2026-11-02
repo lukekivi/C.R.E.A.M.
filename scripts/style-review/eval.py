@@ -29,7 +29,7 @@ from pathlib import Path
 from agent import REPO_ROOT, ReviewError, categories_by_id, diff_command, line_range, run_review, sh, span, temp_worktree
 
 CASES_DIR = REPO_ROOT / "evals" / "style-reviewer" / "cases"
-RUBRIC_PATHS = ("STYLE.md", "CLAUDE.md", "docs", ".claude/agents/style-reviewer.md", ".claude/skills")
+RUBRIC_PATHS = ("STYLE.md", "AGENTS.md", "docs", ".claude/agents/style-reviewer.md", ".claude/skills")
 SLACK = 1
 
 

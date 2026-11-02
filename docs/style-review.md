@@ -51,7 +51,7 @@ Review comments fix one PR. The point of categorizing and collecting every probl
 - A prompt naming the diff to review, `diff_command("BASE...HEAD")`, which leaves out `EXCLUDED_PATHS`, followed by the known categories as `id: description` lines.
 - A fresh GitHub OIDC token for each `claude` process (`identity_token_env`), exchanged for Claude API access.
 
-The agent's prompt doesn't name what to read. It starts with CLAUDE.md in context, which points to STYLE.md, and has read-only tools to look through docs, skills, and existing code; what it actually opens is up to the model. It returns `findings`, `newCategories`, and `notes`. The CLI validates the shape against the schema before `parse_output` returns it; the order of `findings` (most important first) is only requested by the prompt, not enforced.
+The agent's prompt doesn't name what to read. It starts with AGENTS.md in context, which points to STYLE.md, and has read-only tools to look through docs, skills, and existing code; what it actually opens is up to the model. It returns `findings`, `newCategories`, and `notes`. The CLI validates the shape against the schema before `parse_output` returns it; the order of `findings` (most important first) is only requested by the prompt, not enforced.
 
 ### 3. Categorize
 
