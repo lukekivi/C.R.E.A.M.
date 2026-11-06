@@ -61,6 +61,12 @@ interface InstitutionLocalDataSource {
     suspend fun deleteInstitution(itemId: String)
 
     /**
+     * Deletes every institution along with all of their accounts, transactions, and stored
+     * transaction cursors, leaving the local cache empty.
+     */
+    suspend fun deleteAllInstitutions()
+
+    /**
      * Deletes every transaction whose ID appears in [transactionIds].
      *
      * @param transactionIds IDs of the transactions to delete.

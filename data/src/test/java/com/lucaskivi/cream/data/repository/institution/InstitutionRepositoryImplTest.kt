@@ -326,6 +326,40 @@ class InstitutionRepositoryImplTest {
         }
     }
 
+    @Nested
+    inner class ClearLocalCache {
+
+        @Test
+        fun `deletes all institutions locally without calling remote`() = runTest {
+            // Setup
+            val expected = NetworkResult.Success(Unit)
+
+            // Test
+            val result = repo.clearLocalCache()
+
+            // Verify
+            assertEquals(expected, result)
+            coVerify { local.deleteAllInstitutions() }
+            confirmVerified(remote, local)
+        }
+
+        @Test
+        fun `returns failure when the local delete throws`() = runTest {
+            // Setup
+            val error = RuntimeException("disk error")
+            coEvery { local.deleteAllInstitutions() } throws error
+            val expected = NetworkResult.Failure(error)
+
+            // Test
+            val result = repo.clearLocalCache()
+
+            // Verify
+            assertEquals(expected, result)
+            coVerify { local.deleteAllInstitutions() }
+            confirmVerified(remote, local)
+        }
+    }
+
     private fun financialAccount(id: String = "acc1"): FinancialAccount =
         FinancialAccount(
             accountId = id,

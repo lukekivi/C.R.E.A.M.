@@ -221,6 +221,23 @@ class InstitutionLocalDataSourceImplTest {
     }
 
     @Nested
+    inner class DeleteAllInstitutions {
+
+        @Test
+        fun `deletes all institutions`() = runTest {
+            // Setup
+            coJustRun { dao.deleteAllInstitutions() }
+
+            // Test
+            dataSource.deleteAllInstitutions()
+
+            // Verify
+            coVerify { dao.deleteAllInstitutions() }
+            confirmVerified(dao, transformer)
+        }
+    }
+
+    @Nested
     inner class DeleteTransactions {
 
         @Test

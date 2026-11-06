@@ -1,6 +1,7 @@
 package com.lucaskivi.cream.data.repository.institution
 
 import com.lucaskivi.cream.core.NetworkResult
+import com.lucaskivi.cream.core.catching
 import com.lucaskivi.cream.core.flatMap
 import com.lucaskivi.cream.core.map
 import com.lucaskivi.cream.core.onSuccess
@@ -67,4 +68,7 @@ class InstitutionRepositoryImpl(
                 localDataSource.upsertInstitutions(institutions.map { it.institution })
                 localDataSource.upsertAccounts(institutions.flatMap { it.accounts })
             }
+
+    override suspend fun clearLocalCache(): NetworkResult<Unit> =
+        catching { localDataSource.deleteAllInstitutions() }
 }
