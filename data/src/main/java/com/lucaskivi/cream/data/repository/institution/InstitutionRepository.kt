@@ -80,4 +80,13 @@ interface InstitutionRepository {
      *   call fails.
      */
     suspend fun refreshInstitutions(): NetworkResult<Unit>
+
+    /**
+     * Clears all locally cached institution data. The backend is untouched: linked
+     * institutions stay linked and repopulate on the next refresh.
+     *
+     * @return [NetworkResult.Success] on success, or [NetworkResult.Failure] if the local cache
+     *   could not be cleared.
+     */
+    suspend fun clearLocalCache(): NetworkResult<Unit>
 }
