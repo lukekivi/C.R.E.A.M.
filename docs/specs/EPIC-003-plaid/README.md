@@ -11,7 +11,7 @@ Let the user link, view, refresh, and disconnect institutions through Plaid and 
 
 - Debug-build wiring to the Functions emulator (`:remote-datasource` factory and build config, debug network security config in `:app`).
 - Plaid Link SDK dependency and initialization (`gradle/libs.versions.toml`, `:app/build.gradle.kts`, `CreamApplication`).
-- `app/.../screens/institutions/` (including `PlaidLinkLauncher.kt` and `PlaidLinkResult.kt`) and `app/.../screens/accountdetail/`.
+- `app/.../link/` (`InstitutionLinkLauncher.kt` and `model/InstitutionLinkResult.kt`), `app/.../screens/institutions/` and `app/.../screens/accountdetail/`.
 - `MainRoute` entries and `MainNavGraph` registration for both screens.
 - `createLinkToken` on `InstitutionRepository` if the screen needs it.
 - Clearing the local institution cache on sign-out (`:local-datasource` institution DAO and datasource, `InstitutionRepository`, and the sign-out path).
