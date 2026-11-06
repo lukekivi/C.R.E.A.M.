@@ -59,6 +59,10 @@ class InstitutionLocalDataSourceImpl internal constructor(
         dao.deleteInstitution(itemId)
     }
 
+    override suspend fun deleteAllInstitutions() {
+        dao.deleteAllInstitutions()
+    }
+
     override suspend fun deleteTransactions(transactionIds: List<String>) {
         dao.deleteTransactions(transactionIds)
     }

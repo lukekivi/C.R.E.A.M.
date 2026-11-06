@@ -115,6 +115,13 @@ interface InstitutionDao {
     suspend fun deleteInstitution(itemId: String)
 
     /**
+     * Deletes every institution and, via cascade, all accounts and transactions. Stored
+     * transaction cursors go with their institution rows.
+     */
+    @Query("DELETE FROM linked_institution")
+    suspend fun deleteAllInstitutions()
+
+    /**
      * Deletes every transaction whose ID appears in [transactionIds].
      *
      * @param transactionIds IDs of the transactions to delete.
