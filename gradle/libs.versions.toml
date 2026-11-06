@@ -16,6 +16,7 @@ googleid = "1.1.1"
 ksp = "2.3.12"
 mockk = "1.13.12"
 navigation3 = "1.1.1"
+plaidLink = "6.4.0"
 room = "2.8.4"
 
 [libraries]
@@ -48,6 +49,7 @@ androidx-credentials-play-services-auth = { group = "androidx.credentials", name
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+plaid-link-sdk-core = { group = "com.plaid.link", name = "sdk-core", version.ref = "plaidLink" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
