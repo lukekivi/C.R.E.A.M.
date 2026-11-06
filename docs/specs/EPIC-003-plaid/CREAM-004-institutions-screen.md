@@ -13,7 +13,7 @@ A screen listing every linked institution with its accounts and balances grouped
 - `MainRoute.Institutions`, reachable from a button on `HomeScreen`.
 - `InstitutionsViewModel` (companion factory per the `cream-viewmodel` pattern) backed by `InstitutionRepository`:
   - Collects `observeInstitutionsWithAccounts()`.
-  - `linkInstitution()` — obtains a link token, hands it to the launcher via a one-shot event; on `PlaidLinkResult.Success` calls `institutionRepository.linkInstitution(...)`.
+  - `linkInstitution()` — obtains a link token, hands it to the launcher via a one-shot event; on `InstitutionLinkResult.Success` calls `institutionRepository.linkInstitution(...)`.
   - `refresh()` — `refreshInstitutions()` then `syncTransactions(itemId)` per institution.
   - `disconnect(itemId)` — with a confirmation dialog.
   - UiState covers loading, refreshing, linking, and error.
