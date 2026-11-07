@@ -196,30 +196,46 @@ When the assertion itself runs the call (e.g. `assertThrows`), there is no separ
 
 ### Confirm verified
 
-Every test that uses mocked collaborators ends its Verify section with `confirmVerified(...)` on all of them, so any call the test didn't explicitly verify fails the test. This means each test verifies every call it causes, including calls to stubbed methods.
+A test class with mocked collaborators calls `confirmVerified(...)` on all of them once, in its top-level `@AfterEach` `tearDown`, so any call a test didn't explicitly verify fails that test. Tests don't call it themselves. This means each test verifies every call it causes, including calls to stubbed methods.
 
 - "Collaborators" are the mocks injected into the class under test, plus mocks that model a call the class makes across a boundary (e.g. a callable reference). Mocks that only stand in for data values, and mocks of library internals (e.g. a Firebase `Task`), are left out.
+- A collaborator mock that a test creates itself (e.g. a callable returned by a setup helper) is out of `tearDown`'s reach, so that test confirms it at the end of its Verify section.
 - Verify all expected calls in a single `verify { }` block, listed in the order they happen. Use `coVerify` if any of them suspends. Only split into another block when the verification parameters differ, e.g. `coVerify(exactly = 0) { }` for calls that must not happen.
 
 ```kotlin
-@Test
-fun `returns the transformed link token`() = runTest {
-    // Setup
-    val callable = setupCallable(CREATE_LINK_TOKEN, response)
-    every { transformer.toLinkToken(response) } returns "lt-abc"
-    val expected = NetworkResult.Success("lt-abc")
+class InstitutionRemoteDataSourceImplTest {
 
-    // Test
-    val result = dataSource.createLinkToken()
+    private val functions: FirebaseFunctions = mockk()
+    private val transformer: InstitutionTransformer = mockk()
 
-    // Verify
-    assertEquals(expected, result)
-    verify {
-        functions.getHttpsCallable(CREATE_LINK_TOKEN)
-        callable.call()
-        transformer.toLinkToken(response)
+    @AfterEach
+    fun tearDown() {
+        confirmVerified(functions, transformer)
     }
-    confirmVerified(functions, callable, transformer)
+
+    @Nested
+    inner class CreateLinkToken {
+
+        @Test
+        fun `returns the transformed link token`() = runTest {
+            // Setup
+            val callable = setupCallable(CREATE_LINK_TOKEN, response)
+            every { transformer.toLinkToken(response) } returns "lt-abc"
+            val expected = NetworkResult.Success("lt-abc")
+
+            // Test
+            val result = dataSource.createLinkToken()
+
+            // Verify
+            assertEquals(expected, result)
+            verify {
+                functions.getHttpsCallable(CREATE_LINK_TOKEN)
+                callable.call()
+                transformer.toLinkToken(response)
+            }
+            confirmVerified(callable)
+        }
+    }
 }
 ```
 
