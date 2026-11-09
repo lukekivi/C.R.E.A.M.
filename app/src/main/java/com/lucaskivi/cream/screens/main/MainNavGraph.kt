@@ -32,10 +32,11 @@ fun MainNavGraph() {
     val backStack = remember { mutableStateListOf<MainRoute>(MainRoute.Loading) }
 
     LaunchedEffect(uiState.isInitialized, uiState.isAuthenticated) {
-        if (!uiState.isInitialized) return@LaunchedEffect
-        val destination = if (uiState.isAuthenticated) MainRoute.Home else MainRoute.Login
-        backStack.clear()
-        backStack.add(destination)
+        if (uiState.isInitialized) {
+            val destination = if (uiState.isAuthenticated) MainRoute.Home else MainRoute.Login
+            backStack.clear()
+            backStack.add(destination)
+        }
     }
 
     NavDisplay(

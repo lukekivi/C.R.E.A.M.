@@ -144,6 +144,14 @@ GetGoogleIdOption.Builder()
     .build()
 ```
 
+## Returns
+
+A function has at most one `return`, at the end. Don't return early, including `?: return` and labeled returns such as `return@LaunchedEffect`; branch with `if`/`when` instead. Several exit points make a function harder to follow.
+
+## Extension receivers
+
+Inside an extension function, reference the receiver's members with an explicit `this` (`this.error`, `this.toResult()`), so it's clear which values come from the receiver. Class members don't take `this`.
+
 ## ViewModel formatting
 
 Every ViewModel primary constructor uses the per-line / trailing-comma format above, even for a single parameter:
@@ -242,4 +250,5 @@ When a datasource impl converts raw payloads (callable responses, API bodies) in
 
 - The transformer is an `internal` class injected through the impl's constructor; the module's factory passes the real one.
 - Impl tests mock the transformer. They verify what is sent to the backend, that the response is handed to the transformer, and that the transformer's result (or failure) is returned.
+- Outside datasource impls, a conversion that nothing needs to mock can be a `private` or `internal` extension function in the file that uses it.
 - Helpers that aren't specific to one feature, such as casts, go in a neutral extensions file in the module (e.g. `com.lucaskivi.cream.remote.CastExtensions`), not in the transformer.
