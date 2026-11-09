@@ -158,7 +158,9 @@ The `UiState` data class is defined **below** the ViewModel class, not above. Th
 
 ## Packages
 
-Model types (data classes and enums that carry data between layers) live in a `model` subpackage of their feature package, e.g. `com.lucaskivi.cream.core.institution.model`. The feature package itself holds the behavior: interfaces, implementations, factories.
+- A feature package holds behavior: interfaces, implementations, factories, composables.
+- Data types it exposes (data classes, enums, sealed types) go in its `model` subpackage.
+- A screen's `UiState` stays in the screen package, next to its ViewModel.
 
 ## Companion objects
 
