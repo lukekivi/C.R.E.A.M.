@@ -61,3 +61,5 @@ If the ViewModel needs a repository that doesn't exist yet:
 - `LocalAppContainer` is provided once at the root in `MainActivity` — never re-provided lower in the tree.
 - No Hilt, no Koin, no service locator pattern elsewhere.
 - `UiState` describes what the screen shows. See "Declarative UiState" in STYLE.md.
+- One-time instructions to the screen go on an `events` flow, not in `UiState`. See "Events" in STYLE.md.
+- Dependencies that don't come from `AppContainer` are constructed in the factory and passed through the constructor too.

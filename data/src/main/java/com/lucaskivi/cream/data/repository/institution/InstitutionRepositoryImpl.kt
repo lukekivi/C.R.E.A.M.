@@ -36,6 +36,9 @@ class InstitutionRepositoryImpl(
     ): Flow<List<Transaction>> =
         localDataSource.observeTransactions(accountId)
 
+    override suspend fun createLinkToken(): NetworkResult<String> =
+        remoteDataSource.createLinkToken()
+
     override suspend fun linkInstitution(
         publicToken: String,
         institutionId: String,
