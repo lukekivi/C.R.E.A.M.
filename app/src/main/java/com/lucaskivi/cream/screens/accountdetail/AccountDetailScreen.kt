@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -108,6 +110,8 @@ fun AccountDetailScreen(
                 AccountContent(
                     account = account,
                     transactionGroups = uiState.transactionGroups,
+                    isSyncingTransactions = uiState.isSyncingTransactions,
+                    isTransactionSyncFailed = uiState.isTransactionSyncFailed,
                 )
             }
         }
@@ -128,23 +132,40 @@ private fun LoadingState() {
 }
 
 /**
- * The balance header followed by the transactions grouped under date headers, or an empty
- * state.
+ * The balance header followed by the transaction area: sync status, then the transactions
+ * grouped under date headers, or an empty state.
  *
  * @param account The account to show.
  * @param transactionGroups The account's transactions, grouped by date, newest first.
+ * @param isSyncingTransactions Whether the account's transactions are being synced.
+ * @param isTransactionSyncFailed Whether to show the inline sync error.
  */
 @Composable
 private fun AccountContent(
     account: FinancialAccount,
     transactionGroups: List<TransactionDateGroup>,
+    isSyncingTransactions: Boolean,
+    isTransactionSyncFailed: Boolean,
 ) {
     val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item(key = "balance") {
             BalanceHeader(account)
         }
-        if (transactionGroups.isEmpty()) {
+        if (isSyncingTransactions) {
+            item(key = "syncing") {
+                SyncingRow()
+            }
+        }
+        if (isTransactionSyncFailed) {
+            item(key = "sync-failed") {
+                SyncFailedRow()
+            }
+        }
+        val hasNoTransactions = transactionGroups.isEmpty() &&
+            !isSyncingTransactions &&
+            !isTransactionSyncFailed
+        if (hasNoTransactions) {
             item(key = "empty") {
                 EmptyTransactions()
             }
@@ -204,7 +225,42 @@ private fun BalanceHeader(
 }
 
 /**
- * Shown when the account has no cached transactions.
+ * A small status row shown while the account's transactions are syncing.
+ */
+@Composable
+private fun SyncingRow() {
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(16.dp),
+            strokeWidth = 2.dp,
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = "Syncing transactions…",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * A small inline error shown after a background transaction sync fails.
+ */
+@Composable
+private fun SyncFailedRow() {
+    Text(
+        text = "Couldn't load transactions. Pull to refresh.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+    )
+}
+
+/**
+ * Shown when the account has no cached transactions and none are syncing.
  */
 @Composable
 private fun EmptyTransactions() {
