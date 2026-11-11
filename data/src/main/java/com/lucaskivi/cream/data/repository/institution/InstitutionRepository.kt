@@ -4,6 +4,7 @@ import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.core.institution.model.Transaction
+import com.lucaskivi.cream.core.institution.model.TransactionSyncState
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -41,6 +42,23 @@ interface InstitutionRepository {
     ): Flow<List<Transaction>>
 
     /**
+     * Emits the transaction sync state of the institution identified by [itemId]: its current
+     * state on collection, then every change.
+     *
+     * The state is [TransactionSyncState.Syncing] while a sync of [itemId] is in flight, whoever
+     * started it, including the background sync started by [linkInstitution]. When it ends the
+     * state becomes [TransactionSyncState.Idle] on success or cancellation, or
+     * [TransactionSyncState.Failed] on failure. An institution that hasn't
+     * synced since launch is [TransactionSyncState.Idle], and [clearLocalCache] resets every
+     * institution to [TransactionSyncState.Idle].
+     *
+     * @param itemId Identifier of the institution to observe.
+     */
+    fun observeTransactionSyncState(
+        itemId: String,
+    ): Flow<TransactionSyncState>
+
+    /**
      * Creates a short-lived token that starts the institution-linking UI flow.
      *
      * @return [NetworkResult.Success] with the link token, or [NetworkResult.Failure] if the
@@ -51,6 +69,10 @@ interface InstitutionRepository {
     /**
      * Completes the institution-linking flow and refreshes the local cache. Exchanges
      * [publicToken] with the backend, then fetches the updated institution and account list.
+     *
+     * Once both succeed, the new institution's transactions are synced in the background, outliving
+     * the caller. That sync's progress and outcome are reported through
+     * [observeTransactionSyncState] only; its failure doesn't fail the link.
      *
      * @param publicToken One-time token produced at the end of the link UI flow.
      * @param institutionId Provider's identifier for the institution the user selected.
@@ -68,9 +90,15 @@ interface InstitutionRepository {
      * Fetches incremental transaction changes for [itemId] from the backend and applies them
      * to the local cache. Uses the stored cursor from the previous sync; passes null on first sync.
      *
+     * At most one sync runs per institution: a call made while one is in flight joins it and
+     * returns its result instead of starting another. The sync belongs to the app, not the
+     * caller, so cancelling a caller doesn't stop it. A call made after it ends starts a fresh
+     * one. Progress and outcome are also reported through [observeTransactionSyncState].
+     *
      * @param itemId Identifier of the institution to sync.
      * @return [NetworkResult.Success] on success, or [NetworkResult.Failure] if the remote
-     *   call fails. The local cache is only mutated on success.
+     *   call or a local write fails, or if the sync is cancelled by [clearLocalCache]. The local
+     *   cache is only mutated when the remote call succeeds.
      */
     suspend fun syncTransactions(
         itemId: String,
@@ -100,6 +128,10 @@ interface InstitutionRepository {
     /**
      * Clears all locally cached institution data. The backend is untouched: linked
      * institutions stay linked and repopulate on the next refresh.
+     *
+     * Every in-flight [syncTransactions] run, including the background sync started by
+     * [linkInstitution], is cancelled first, so none can write data back afterwards. Then every
+     * institution's sync state resets to [TransactionSyncState.Idle].
      *
      * @return [NetworkResult.Success] on success, or [NetworkResult.Failure] if the local cache
      *   could not be cleared.

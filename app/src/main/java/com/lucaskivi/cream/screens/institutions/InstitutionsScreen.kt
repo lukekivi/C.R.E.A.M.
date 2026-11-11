@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -52,8 +54,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
-import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
+import com.lucaskivi.cream.core.institution.model.TransactionSyncState
 import com.lucaskivi.cream.link.rememberInstitutionLinkLauncher
+import com.lucaskivi.cream.screens.institutions.model.InstitutionItem
 import com.lucaskivi.cream.ui.LocalAppContainer
 import com.lucaskivi.cream.ui.format.formattedBalance
 import com.lucaskivi.cream.ui.format.formattedDetails
@@ -208,7 +211,7 @@ private fun EmptyState(
  */
 @Composable
 private fun InstitutionList(
-    institutions: List<LinkedInstitutionWithAccounts>,
+    institutions: List<InstitutionItem>,
     onDisconnect: (LinkedInstitution) -> Unit,
     onAccountClick: (String) -> Unit,
 ) {
@@ -216,16 +219,17 @@ private fun InstitutionList(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 88.dp),
     ) {
-        institutions.forEach { institutionWithAccounts ->
-            val institution = institutionWithAccounts.institution
+        institutions.forEach { item ->
+            val institution = item.institution.institution
             item(key = institution.itemId) {
                 InstitutionHeader(
                     institution = institution,
+                    syncState = item.syncState,
                     onDisconnect = { onDisconnect(institution) },
                 )
             }
             items(
-                items = institutionWithAccounts.accounts,
+                items = item.institution.accounts,
                 key = { account -> account.accountId },
             ) { account ->
                 AccountRow(
@@ -241,14 +245,16 @@ private fun InstitutionList(
 }
 
 /**
- * An institution's name and an overflow menu offering Disconnect.
+ * An institution's name, its transaction sync status, and an overflow menu offering Disconnect.
  *
  * @param institution The institution to show.
+ * @param syncState The institution's transaction sync state.
  * @param onDisconnect Called when the user chooses Disconnect.
  */
 @Composable
 private fun InstitutionHeader(
     institution: LinkedInstitution,
+    syncState: TransactionSyncState,
     onDisconnect: () -> Unit,
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
@@ -258,12 +264,14 @@ private fun InstitutionHeader(
             .padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = institution.institutionName,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f),
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = institution.institutionName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            SyncStatus(syncState)
+        }
         Box {
             IconButton(onClick = { isMenuOpen = true }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More options")
@@ -281,6 +289,38 @@ private fun InstitutionHeader(
                 )
             }
         }
+    }
+}
+
+/**
+ * A small status line for an institution's transaction sync: a spinner while syncing, a quiet
+ * error line after a failed sync, and nothing when idle.
+ *
+ * @param syncState The institution's transaction sync state.
+ */
+@Composable
+private fun SyncStatus(
+    syncState: TransactionSyncState,
+) {
+    when (syncState) {
+        TransactionSyncState.Syncing -> Row(verticalAlignment = Alignment.CenterVertically) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(12.dp),
+                strokeWidth = 2.dp,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Syncing transactions…",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        is TransactionSyncState.Failed -> Text(
+            text = "Couldn't sync transactions",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+        TransactionSyncState.Idle -> Unit
     }
 }
 

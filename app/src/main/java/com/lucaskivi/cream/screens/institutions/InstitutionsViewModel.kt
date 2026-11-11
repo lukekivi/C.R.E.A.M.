@@ -11,14 +11,22 @@ import com.lucaskivi.cream.core.onSuccess
 import com.lucaskivi.cream.data.di.AppContainer
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.link.model.InstitutionLinkResult
+import com.lucaskivi.cream.screens.institutions.model.InstitutionItem
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,11 +34,12 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the Institutions screen.
  *
- * Lists every linked institution with its accounts, and lets the user link a new institution,
- * refresh all of them, and disconnect one.
+ * Lists every linked institution with its accounts and transaction sync state, and lets the
+ * user link a new institution, refresh all of them, and disconnect one.
  *
  * @param institutionRepository Source of linked institutions and the actions on them.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class InstitutionsViewModel(
     private val institutionRepository: InstitutionRepository,
 ) : ViewModel() {
@@ -46,9 +55,13 @@ class InstitutionsViewModel(
     val uiState: StateFlow<InstitutionsUiState> = mutableUiState.asStateFlow()
 
     init {
+        // The local cache re-emits on every write, including each transaction sync, so equal
+        // lists are dropped before flatMapLatest rebuilds the per-institution sync-state flows.
         institutionRepository
             .observeInstitutionsWithAccounts()
-            .onEach { institutions -> mutableUiState.update { it.copy(isLoading = false, institutions = institutions) } }
+            .distinctUntilChanged()
+            .flatMapLatest { institutions -> institutions.toInstitutionItems() }
+            .onEach { items -> mutableUiState.update { it.copy(isLoading = false, institutions = items) } }
             .launchIn(viewModelScope)
     }
 
@@ -202,6 +215,22 @@ class InstitutionsViewModel(
     }
 
     /**
+     * Pairs each institution with its live transaction sync state. Emits an empty list right
+     * away when there are no institutions, since combining no flows would never emit.
+     */
+    private fun List<LinkedInstitutionWithAccounts>.toInstitutionItems(): Flow<List<InstitutionItem>> =
+        if (this.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            val itemFlows = this.map { institution ->
+                institutionRepository
+                    .observeTransactionSyncState(institution.institution.itemId)
+                    .map { syncState -> InstitutionItem(institution, syncState) }
+            }
+            combine(itemFlows) { items -> items.toList() }
+        }
+
+    /**
      * Factory entry points for [InstitutionsViewModel].
      */
     companion object {
@@ -227,7 +256,7 @@ class InstitutionsViewModel(
  * UI state for the Institutions screen.
  *
  * @property isLoading Whether the first list of institutions hasn't loaded yet.
- * @property institutions Every linked institution with its accounts.
+ * @property institutions Every linked institution with its accounts and sync state.
  * @property isRefreshing Whether a pull to refresh is in progress.
  * @property isLinking Whether linking is in progress, from requesting a link token until the
  *   link flow's outcome is handled.
@@ -237,7 +266,7 @@ class InstitutionsViewModel(
  */
 data class InstitutionsUiState(
     val isLoading: Boolean = true,
-    val institutions: List<LinkedInstitutionWithAccounts> = emptyList(),
+    val institutions: List<InstitutionItem> = emptyList(),
     val isRefreshing: Boolean = false,
     val isLinking: Boolean = false,
     val pendingLinkToken: String? = null,
