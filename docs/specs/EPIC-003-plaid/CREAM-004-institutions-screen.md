@@ -23,6 +23,7 @@ A screen listing every linked institution with its accounts and balances grouped
 ## Out of scope
 
 - Account detail navigation target (CREAM-005) — account rows can be non-clickable or route to a stub until then.
+- Transaction sync state (syncing and failed indicators) and syncing a newly linked institution in the background (CREAM-014).
 
 ## Notes
 

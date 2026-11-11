@@ -3,7 +3,7 @@ id: CREAM-007
 title: Manual Plaid Sandbox end-to-end test
 status: todo
 created: 2026-10-19
-depends-on: [CREAM-004, CREAM-005, CREAM-006]
+depends-on: [CREAM-004, CREAM-005, CREAM-006, CREAM-014]
 ---
 
 Walk the full flow against Plaid Sandbox on the emulators and fix anything that breaks. Sandbox credentials: institution "First Platypus Bank", `user_good` / `pass_good`.

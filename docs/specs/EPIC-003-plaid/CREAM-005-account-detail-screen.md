@@ -14,3 +14,7 @@ Tapping an account on the Institutions screen opens a detail screen with the cur
 - `AccountDetailViewModel` (companion factory) collecting `observeAccount(accountId)` and `observeTransactions(accountId)`. `refresh()` resolves the account's `itemId` and calls `syncTransactions(itemId)`.
 - `AccountDetailScreen` — large current balance, account name + mask + type, transactions grouped by date, pull to refresh, loading/error/empty states.
 - Register the entry in `MainNavGraph`.
+
+## Out of scope
+
+- Showing transaction sync progress or background sync failures (CREAM-014).
