@@ -1,5 +1,6 @@
 package com.lucaskivi.cream.screens.institutions
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,19 +55,21 @@ import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.link.rememberInstitutionLinkLauncher
 import com.lucaskivi.cream.ui.LocalAppContainer
-import com.lucaskivi.cream.ui.format.MISSING_AMOUNT_PLACEHOLDER
-import com.lucaskivi.cream.ui.format.formatCurrency
+import com.lucaskivi.cream.ui.format.formattedBalance
+import com.lucaskivi.cream.ui.format.formattedDetails
 
 /**
  * Lists the user's linked institutions with their accounts and balances, and lets the user
- * link a new one, pull to refresh, and disconnect one.
+ * link a new one, pull to refresh, disconnect one, and open an account.
  *
  * @param onNavigateBack Called when the user leaves the screen.
+ * @param onAccountClick Called with an account's ID when the user taps that account.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstitutionsScreen(
     onNavigateBack: () -> Unit,
+    onAccountClick: (String) -> Unit,
 ) {
     val appContainer = LocalAppContainer.current
     val viewModel: InstitutionsViewModel = viewModel(factory = InstitutionsViewModel.factory(appContainer))
@@ -126,6 +129,7 @@ fun InstitutionsScreen(
                 else -> InstitutionList(
                     institutions = uiState.institutions,
                     onDisconnect = viewModel::requestDisconnect,
+                    onAccountClick = onAccountClick,
                 )
             }
         }
@@ -200,11 +204,13 @@ private fun EmptyState(
  *
  * @param institutions The institutions to list.
  * @param onDisconnect Called when the user chooses to disconnect an institution.
+ * @param onAccountClick Called with an account's ID when the user taps that account.
  */
 @Composable
 private fun InstitutionList(
     institutions: List<LinkedInstitutionWithAccounts>,
     onDisconnect: (LinkedInstitution) -> Unit,
+    onAccountClick: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -222,7 +228,10 @@ private fun InstitutionList(
                 items = institutionWithAccounts.accounts,
                 key = { account -> account.accountId },
             ) { account ->
-                AccountRow(account)
+                AccountRow(
+                    account = account,
+                    onClick = { onAccountClick(account.accountId) },
+                )
             }
             item(key = "${institution.itemId}-divider") {
                 HorizontalDivider()
@@ -276,17 +285,20 @@ private fun InstitutionHeader(
 }
 
 /**
- * One account: its name, masked number and type, and its current balance. Not clickable.
+ * One account: its name, masked number and type, and its current balance.
  *
  * @param account The account to show.
+ * @param onClick Called when the user taps the account.
  */
 @Composable
 private fun AccountRow(
     account: FinancialAccount,
+    onClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -296,7 +308,7 @@ private fun AccountRow(
                 style = MaterialTheme.typography.bodyLarge,
             )
             Text(
-                text = account.details(),
+                text = account.formattedDetails(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -338,23 +350,3 @@ private fun DisconnectDialog(
         },
     )
 }
-
-/**
- * Returns the account's type, preceded by its masked number when known
- * (e.g. "•••• 1234 · Depository").
- */
-private fun FinancialAccount.details(): String {
-    val type = this.type.name
-        .lowercase()
-        .replaceFirstChar { it.titlecase() }
-    return listOfNotNull(this.mask?.let { "•••• $it" }, type).joinToString(" · ")
-}
-
-/**
- * Returns the current balance formatted in the account's currency, or
- * [MISSING_AMOUNT_PLACEHOLDER] when the balance is unknown.
- */
-private fun FinancialAccount.formattedBalance(): String =
-    this.balanceCurrent
-        ?.let { balance -> formatCurrency(balance, this.isoCurrencyCode) }
-        ?: MISSING_AMOUNT_PLACEHOLDER
