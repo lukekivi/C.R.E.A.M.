@@ -6,6 +6,6 @@
   ],
   "allowed": [
     {"what": "vendor name in vendor-neutral KDoc", "file": "remote-datasource/src/main/java/com/lucaskivi/cream/institution/FixtureBalanceSource.kt", "lines": [10, 16], "why": "Whether a :remote-datasource interface counts as vendor-neutral is a judgment call."},
-    {"what": "impl imported instead of the module factory", "file": "remote-datasource/src/main/java/com/lucaskivi/cream/institution/FixtureBalanceSource.kt", "lines": [24, 30], "why": "The fixture Impl has no factory function. A real inconsistency, but not what the case plants."}
+    {"what": "impl imported instead of the module factory", "file": "remote-datasource/src/main/java/com/lucaskivi/cream/institution/FixtureBalanceSource.kt", "lines": [21, 34], "why": "The fixture Impl has no factory function. A real inconsistency, but not what the case plants."}
   ]
 }

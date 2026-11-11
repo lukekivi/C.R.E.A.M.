@@ -37,7 +37,9 @@ import com.lucaskivi.cream.ui.LocalAppContainer
  * @param onNavigateToRegister Called when the user taps "Don't have an account? Register".
  */
 @Composable
-fun LoginScreen(onNavigateToRegister: () -> Unit) {
+fun LoginScreen(
+    onNavigateToRegister: () -> Unit,
+) {
     val appContainer = LocalAppContainer.current
     val viewModel: LoginViewModel = viewModel(factory = LoginViewModel.factory(appContainer))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

@@ -2,6 +2,7 @@
   "description": "One ViewModel file breaking most formatting, KDoc, ViewModel, and module rules.",
   "expected": [
     {"what": "impl imported instead of the module factory", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [4, 4]},
+    {"what": "parameters not one per line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [15, 15]},
     {"what": "UiState above the ViewModel", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [10, 15]},
     {"what": "single-line ViewModel constructor", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [22, 22]},
     {"what": "companion object not last", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [24, 29]},
@@ -11,6 +12,7 @@
     {"what": "missing @param", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [39, 42]},
     {"what": "parameters not one per line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [42, 42]},
     {"what": "expression body on the header line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [42, 42]},
+    {"what": "parameters not one per line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [49, 49]},
     {"what": "method chain on one line", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [49, 50]},
     {"what": "missing KDoc", "file": "app/src/main/java/com/lucaskivi/cream/screens/fixture/FixtureViewModel.kt", "lines": [52, 53]}
   ],

@@ -26,10 +26,14 @@ class InstitutionRepositoryImpl(
     override fun observeInstitutionsWithAccounts(): Flow<List<LinkedInstitutionWithAccounts>> =
         localDataSource.observeInstitutionsWithAccounts()
 
-    override fun observeAccount(accountId: String): Flow<FinancialAccount?> =
+    override fun observeAccount(
+        accountId: String,
+    ): Flow<FinancialAccount?> =
         localDataSource.observeAccount(accountId)
 
-    override fun observeTransactions(accountId: String): Flow<List<Transaction>> =
+    override fun observeTransactions(
+        accountId: String,
+    ): Flow<List<Transaction>> =
         localDataSource.observeTransactions(accountId)
 
     override suspend fun linkInstitution(
@@ -45,7 +49,9 @@ class InstitutionRepositoryImpl(
             )
             .flatMap { refreshInstitutions() }
 
-    override suspend fun syncTransactions(itemId: String): NetworkResult<Unit> {
+    override suspend fun syncTransactions(
+        itemId: String,
+    ): NetworkResult<Unit> {
         val cursor = localDataSource.getTransactionCursor(itemId)
         return remoteDataSource
             .syncTransactions(itemId, cursor)
@@ -56,7 +62,9 @@ class InstitutionRepositoryImpl(
             }
     }
 
-    override suspend fun disconnectInstitution(itemId: String): NetworkResult<Unit> =
+    override suspend fun disconnectInstitution(
+        itemId: String,
+    ): NetworkResult<Unit> =
         remoteDataSource
             .disconnectInstitution(itemId)
             .onSuccess { localDataSource.deleteInstitution(itemId) }

@@ -17,7 +17,9 @@ import com.lucaskivi.cream.institution.institutionRemoteDataSource
  *
  * @param context Application context passed to datasources that require it.
  */
-class AppContainer(context: Context) {
+class AppContainer(
+    context: Context,
+) {
     /**
      * Singleton [InstitutionRepository] for the app.
      */

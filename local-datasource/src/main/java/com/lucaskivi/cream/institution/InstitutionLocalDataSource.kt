@@ -21,14 +21,18 @@ interface InstitutionLocalDataSource {
      *
      * @param accountId The account to observe.
      */
-    fun observeAccount(accountId: String): Flow<FinancialAccount?>
+    fun observeAccount(
+        accountId: String,
+    ): Flow<FinancialAccount?>
 
     /**
      * Emits all transactions for [accountId], ordered newest-first.
      *
      * @param accountId The account whose transactions to observe.
      */
-    fun observeTransactions(accountId: String): Flow<List<Transaction>>
+    fun observeTransactions(
+        accountId: String,
+    ): Flow<List<Transaction>>
 
     /**
      * Inserts or updates each institution in [institutions] without touching the stored
@@ -36,21 +40,27 @@ interface InstitutionLocalDataSource {
      *
      * @param institutions Institutions to upsert.
      */
-    suspend fun upsertInstitutions(institutions: List<LinkedInstitution>)
+    suspend fun upsertInstitutions(
+        institutions: List<LinkedInstitution>,
+    )
 
     /**
      * Inserts or replaces each account in [accounts].
      *
      * @param accounts Accounts to upsert.
      */
-    suspend fun upsertAccounts(accounts: List<FinancialAccount>)
+    suspend fun upsertAccounts(
+        accounts: List<FinancialAccount>,
+    )
 
     /**
      * Inserts or replaces each transaction in [transactions].
      *
      * @param transactions Transactions to upsert.
      */
-    suspend fun upsertTransactions(transactions: List<Transaction>)
+    suspend fun upsertTransactions(
+        transactions: List<Transaction>,
+    )
 
     /**
      * Deletes the institution identified by [itemId] and, via cascade, all of its accounts and
@@ -58,7 +68,9 @@ interface InstitutionLocalDataSource {
      *
      * @param itemId The institution to delete.
      */
-    suspend fun deleteInstitution(itemId: String)
+    suspend fun deleteInstitution(
+        itemId: String,
+    )
 
     /**
      * Deletes every institution along with all of their accounts, transactions, and stored
@@ -71,7 +83,9 @@ interface InstitutionLocalDataSource {
      *
      * @param transactionIds IDs of the transactions to delete.
      */
-    suspend fun deleteTransactions(transactionIds: List<String>)
+    suspend fun deleteTransactions(
+        transactionIds: List<String>,
+    )
 
     /**
      * Returns the stored transaction sync cursor for [itemId], or null if transactions have
@@ -79,7 +93,9 @@ interface InstitutionLocalDataSource {
      *
      * @param itemId The institution whose cursor to retrieve.
      */
-    suspend fun getTransactionCursor(itemId: String): String?
+    suspend fun getTransactionCursor(
+        itemId: String,
+    ): String?
 
     /**
      * Persists [cursor] as the transaction sync cursor for the institution identified by [itemId].

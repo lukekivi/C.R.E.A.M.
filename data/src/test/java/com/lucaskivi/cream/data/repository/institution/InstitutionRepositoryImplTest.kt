@@ -360,7 +360,9 @@ class InstitutionRepositoryImplTest {
         }
     }
 
-    private fun financialAccount(id: String = "acc1"): FinancialAccount =
+    private fun financialAccount(
+        id: String = "acc1",
+    ): FinancialAccount =
         FinancialAccount(
             accountId = id,
             itemId = "item1",
@@ -373,7 +375,9 @@ class InstitutionRepositoryImplTest {
             isoCurrencyCode = null,
         )
 
-    private fun transaction(id: String = "tx1"): Transaction =
+    private fun transaction(
+        id: String = "tx1",
+    ): Transaction =
         Transaction(
             transactionId = id,
             accountId = "acc1",

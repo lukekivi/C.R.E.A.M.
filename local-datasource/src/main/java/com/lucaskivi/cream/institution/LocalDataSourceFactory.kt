@@ -8,7 +8,9 @@ import android.content.Context
  *
  * @param context Application context used to open the database file.
  */
-fun institutionLocalDataSource(context: Context): InstitutionLocalDataSource {
+fun institutionLocalDataSource(
+    context: Context,
+): InstitutionLocalDataSource {
     val dao = CreamDatabase
         .getInstance(context)
         .institutionDao()

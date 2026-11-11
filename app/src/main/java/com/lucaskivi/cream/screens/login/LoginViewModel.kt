@@ -70,7 +70,9 @@ class LoginViewModel(
      *
      * @param context Context used to launch the credential picker.
      */
-    fun signInWithGoogle(context: Context) {
+    fun signInWithGoogle(
+        context: Context,
+    ) {
         viewModelScope.launch {
             mutableUiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -109,11 +111,16 @@ class LoginViewModel(
          *
          * @param appContainer Source of the dependencies the ViewModel requires.
          */
-        fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                LoginViewModel(appContainer.authRepository) as T
-        }
+        fun factory(
+            appContainer: AppContainer,
+        ) =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>,
+                ): T =
+                    LoginViewModel(appContainer.authRepository) as T
+            }
     }
 }
 

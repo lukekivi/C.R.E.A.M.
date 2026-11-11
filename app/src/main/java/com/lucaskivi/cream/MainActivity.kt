@@ -14,7 +14,9 @@ import com.lucaskivi.cream.ui.theme.CREAMTheme
  * Entry point activity. Hosts the root Compose content.
  */
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(
+        savedInstanceState: Bundle?,
+    ) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val appContainer = (applicationContext as AppContainerProvider).appContainer

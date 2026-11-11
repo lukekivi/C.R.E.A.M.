@@ -13,7 +13,9 @@ interface FixtureBalanceSource {
      *
      * @param accountId Account to fetch.
      */
-    suspend fun balance(accountId: String): FixtureBalance
+    suspend fun balance(
+        accountId: String,
+    ): FixtureBalance
 }
 
 /**
@@ -25,6 +27,8 @@ internal class FixtureBalanceSourceImpl(
     private val fetch: suspend (String) -> Double,
 ) : FixtureBalanceSource {
 
-    override suspend fun balance(accountId: String): FixtureBalance =
+    override suspend fun balance(
+        accountId: String,
+    ): FixtureBalance =
         FixtureBalance(fetch(accountId))
 }

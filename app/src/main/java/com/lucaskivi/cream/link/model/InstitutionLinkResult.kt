@@ -29,5 +29,7 @@ sealed interface InstitutionLinkResult {
      *
      * @param message Human-readable description of what went wrong.
      */
-    data class Error(val message: String) : InstitutionLinkResult
+    data class Error(
+        val message: String,
+    ) : InstitutionLinkResult
 }

@@ -16,7 +16,9 @@ internal class InstitutionEntityTransformer {
      *
      * @param entity The institution row.
      */
-    fun toLinkedInstitution(entity: LinkedInstitutionEntity): LinkedInstitution =
+    fun toLinkedInstitution(
+        entity: LinkedInstitutionEntity,
+    ): LinkedInstitution =
         LinkedInstitution(
             itemId = entity.itemId,
             institutionId = entity.institutionId,
@@ -42,7 +44,9 @@ internal class InstitutionEntityTransformer {
      *
      * @param entity The account row.
      */
-    fun toFinancialAccount(entity: FinancialAccountEntity): FinancialAccount {
+    fun toFinancialAccount(
+        entity: FinancialAccountEntity,
+    ): FinancialAccount {
         val accountType = try {
             FinancialAccountType.valueOf(entity.type)
         } catch (_: IllegalArgumentException) {
@@ -66,7 +70,9 @@ internal class InstitutionEntityTransformer {
      *
      * @param entity The transaction row.
      */
-    fun toTransaction(entity: TransactionEntity): Transaction =
+    fun toTransaction(
+        entity: TransactionEntity,
+    ): Transaction =
         Transaction(
             transactionId = entity.transactionId,
             accountId = entity.accountId,
@@ -85,7 +91,9 @@ internal class InstitutionEntityTransformer {
      *
      * @param institution The institution to convert.
      */
-    fun toLinkedInstitutionEntity(institution: LinkedInstitution): LinkedInstitutionEntity =
+    fun toLinkedInstitutionEntity(
+        institution: LinkedInstitution,
+    ): LinkedInstitutionEntity =
         LinkedInstitutionEntity(
             itemId = institution.itemId,
             institutionId = institution.institutionId,
@@ -99,7 +107,9 @@ internal class InstitutionEntityTransformer {
      *
      * @param account The account to convert.
      */
-    fun toFinancialAccountEntity(account: FinancialAccount): FinancialAccountEntity =
+    fun toFinancialAccountEntity(
+        account: FinancialAccount,
+    ): FinancialAccountEntity =
         FinancialAccountEntity(
             accountId = account.accountId,
             itemId = account.itemId,
@@ -117,7 +127,9 @@ internal class InstitutionEntityTransformer {
      *
      * @param transaction The transaction to convert.
      */
-    fun toTransactionEntity(transaction: Transaction): TransactionEntity =
+    fun toTransactionEntity(
+        transaction: Transaction,
+    ): TransactionEntity =
         TransactionEntity(
             transactionId = transaction.transactionId,
             accountId = transaction.accountId,

@@ -26,17 +26,23 @@ class InstitutionLocalDataSourceImpl internal constructor(
             .observeInstitutionsWithAccounts()
             .map { list -> list.map { transformer.toLinkedInstitutionWithAccounts(it) } }
 
-    override fun observeAccount(accountId: String): Flow<FinancialAccount?> =
+    override fun observeAccount(
+        accountId: String,
+    ): Flow<FinancialAccount?> =
         dao
             .observeAccount(accountId)
             .map { it?.let(transformer::toFinancialAccount) }
 
-    override fun observeTransactions(accountId: String): Flow<List<Transaction>> =
+    override fun observeTransactions(
+        accountId: String,
+    ): Flow<List<Transaction>> =
         dao
             .observeTransactions(accountId)
             .map { list -> list.map { transformer.toTransaction(it) } }
 
-    override suspend fun upsertInstitutions(institutions: List<LinkedInstitution>) {
+    override suspend fun upsertInstitutions(
+        institutions: List<LinkedInstitution>,
+    ) {
         dao.insertInstitutionsIfAbsent(institutions.map { transformer.toLinkedInstitutionEntity(it) })
         institutions.forEach {
             dao.updateInstitutionInfo(
@@ -47,15 +53,21 @@ class InstitutionLocalDataSourceImpl internal constructor(
         }
     }
 
-    override suspend fun upsertAccounts(accounts: List<FinancialAccount>) {
+    override suspend fun upsertAccounts(
+        accounts: List<FinancialAccount>,
+    ) {
         dao.upsertAccounts(accounts.map { transformer.toFinancialAccountEntity(it) })
     }
 
-    override suspend fun upsertTransactions(transactions: List<Transaction>) {
+    override suspend fun upsertTransactions(
+        transactions: List<Transaction>,
+    ) {
         dao.upsertTransactions(transactions.map { transformer.toTransactionEntity(it) })
     }
 
-    override suspend fun deleteInstitution(itemId: String) {
+    override suspend fun deleteInstitution(
+        itemId: String,
+    ) {
         dao.deleteInstitution(itemId)
     }
 
@@ -63,11 +75,15 @@ class InstitutionLocalDataSourceImpl internal constructor(
         dao.deleteAllInstitutions()
     }
 
-    override suspend fun deleteTransactions(transactionIds: List<String>) {
+    override suspend fun deleteTransactions(
+        transactionIds: List<String>,
+    ) {
         dao.deleteTransactions(transactionIds)
     }
 
-    override suspend fun getTransactionCursor(itemId: String): String? =
+    override suspend fun getTransactionCursor(
+        itemId: String,
+    ): String? =
         dao.getTransactionCursor(itemId)
 
     override suspend fun saveTransactionCursor(

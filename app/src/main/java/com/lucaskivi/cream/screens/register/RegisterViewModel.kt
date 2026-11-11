@@ -63,11 +63,16 @@ class RegisterViewModel(
          *
          * @param appContainer Source of the dependencies the ViewModel requires.
          */
-        fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                RegisterViewModel(appContainer.authRepository) as T
-        }
+        fun factory(
+            appContainer: AppContainer,
+        ) =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>,
+                ): T =
+                    RegisterViewModel(appContainer.authRepository) as T
+            }
     }
 }
 

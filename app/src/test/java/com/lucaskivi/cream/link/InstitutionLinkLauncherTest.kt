@@ -118,7 +118,9 @@ class InstitutionLinkLauncherTest {
         }
     }
 
-    private fun linkSuccess(institution: LinkInstitution?): LinkSuccess {
+    private fun linkSuccess(
+        institution: LinkInstitution?,
+    ): LinkSuccess {
         val metadata: LinkSuccessMetadata = mockk {
             every { this@mockk.institution } returns institution
         }
