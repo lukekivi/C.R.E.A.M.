@@ -54,10 +54,14 @@ class FixtureViewModel(
          *
          * @param appContainer Source of the dependencies the ViewModel requires.
          */
-        fun factory(appContainer: AppContainer): ViewModelProvider.Factory =
+        fun factory(
+            appContainer: AppContainer,
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>,
+                ): T =
                     FixtureViewModel(appContainer.authRepository) as T
             }
     }
@@ -68,4 +72,6 @@ class FixtureViewModel(
  *
  * @param isLoading Whether a request is in flight.
  */
-data class FixtureUiState(val isLoading: Boolean = false)
+data class FixtureUiState(
+    val isLoading: Boolean = false,
+)

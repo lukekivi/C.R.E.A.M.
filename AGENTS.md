@@ -23,3 +23,5 @@ Epics and tickets live in `docs/specs/` as committed markdown files. See [docs/w
 ## Commits
 
 A commit message is an imperative subject line, a blank line, then a 3-line haiku (5-7-5) as the whole body. Never credit Claude in a commit: no `Co-Authored-By: Claude` trailer and no other mention. The `.githooks/commit-msg` hook strips Claude trailers and rejects any other body shape; enable it once per clone with `git config core.hooksPath .githooks`.
+
+See [docs/contributing.md](docs/contributing.md) for how to scope commits and PRs.

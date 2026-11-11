@@ -39,7 +39,9 @@ class AuthRepositoryImpl(
             .createUserWithEmail(email, password)
             .map { it.toDomainUser() }
 
-    override suspend fun signInWithGoogle(idToken: String): NetworkResult<User> =
+    override suspend fun signInWithGoogle(
+        idToken: String,
+    ): NetworkResult<User> =
         authDataSource
             .signInWithGoogle(idToken)
             .map { it.toDomainUser() }

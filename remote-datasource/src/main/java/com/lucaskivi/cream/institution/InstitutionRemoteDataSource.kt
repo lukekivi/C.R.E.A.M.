@@ -55,5 +55,7 @@ interface InstitutionRemoteDataSource {
      *
      * @param itemId Identifier of the institution to disconnect.
      */
-    suspend fun disconnectInstitution(itemId: String): NetworkResult<Unit>
+    suspend fun disconnectInstitution(
+        itemId: String,
+    ): NetworkResult<Unit>
 }

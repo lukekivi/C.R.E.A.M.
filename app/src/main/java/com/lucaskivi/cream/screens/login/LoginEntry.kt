@@ -8,7 +8,9 @@ import com.lucaskivi.cream.navigation.MainRoute
  *
  * @param onNavigateToRegister Forwarded to [LoginScreen] for the "Register" action.
  */
-fun EntryProviderScope<MainRoute>.loginEntry(onNavigateToRegister: () -> Unit) {
+fun EntryProviderScope<MainRoute>.loginEntry(
+    onNavigateToRegister: () -> Unit,
+) {
     entry<MainRoute.Login> {
         LoginScreen(onNavigateToRegister = onNavigateToRegister)
     }

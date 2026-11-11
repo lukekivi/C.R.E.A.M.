@@ -60,7 +60,9 @@ fun HomeScreen() {
  * @param user The signed-in user, or null while auth state is initializing.
  */
 @Composable
-private fun ProfileSection(user: User?) {
+private fun ProfileSection(
+    user: User?,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Avatar(initial = user.welcomeInitial())
         Spacer(Modifier.height(16.dp))
@@ -83,7 +85,9 @@ private fun ProfileSection(user: User?) {
  * @param initial The character to render at the center of the avatar.
  */
 @Composable
-private fun Avatar(initial: String) {
+private fun Avatar(
+    initial: String,
+) {
     Box(
         modifier = Modifier
             .size(96.dp)

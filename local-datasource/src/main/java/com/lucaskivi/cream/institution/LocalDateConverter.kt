@@ -16,7 +16,9 @@ class LocalDateConverter {
      * @param date The date to convert, or null.
      */
     @TypeConverter
-    fun fromLocalDate(date: LocalDate?): String? =
+    fun fromLocalDate(
+        date: LocalDate?,
+    ): String? =
         date?.toString()
 
     /**
@@ -26,6 +28,8 @@ class LocalDateConverter {
      * @param value ISO-8601 date string, or null.
      */
     @TypeConverter
-    fun toLocalDate(value: String?): LocalDate? =
+    fun toLocalDate(
+        value: String?,
+    ): LocalDate? =
         value?.let { LocalDate.parse(it) }
 }

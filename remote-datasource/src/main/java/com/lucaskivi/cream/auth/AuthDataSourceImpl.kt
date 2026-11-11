@@ -58,7 +58,9 @@ class AuthDataSourceImpl internal constructor(
                 .toDomainUser()
         }
 
-    override suspend fun signInWithGoogle(idToken: String): NetworkResult<User> =
+    override suspend fun signInWithGoogle(
+        idToken: String,
+    ): NetworkResult<User> =
         catching {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             firebaseAuth

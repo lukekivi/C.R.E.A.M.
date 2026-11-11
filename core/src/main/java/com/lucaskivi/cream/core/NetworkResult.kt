@@ -12,12 +12,16 @@ sealed interface NetworkResult<out T> {
     /**
      * Successful outcome carrying the produced [value].
      */
-    data class Success<T>(val value: T) : NetworkResult<T>
+    data class Success<T>(
+        val value: T,
+    ) : NetworkResult<T>
 
     /**
      * Failed outcome carrying the underlying [cause].
      */
-    data class Failure(val cause: Throwable) : NetworkResult<Nothing>
+    data class Failure(
+        val cause: Throwable,
+    ) : NetworkResult<Nothing>
 }
 
 /**
@@ -26,7 +30,9 @@ sealed interface NetworkResult<out T> {
  * @param action Receiver invoked with the success value; not called on failure.
  * @return This [NetworkResult] unchanged, for chaining.
  */
-inline fun <T> NetworkResult<T>.onSuccess(action: (T) -> Unit): NetworkResult<T> {
+inline fun <T> NetworkResult<T>.onSuccess(
+    action: (T) -> Unit,
+): NetworkResult<T> {
     if (this is NetworkResult.Success) action(value)
     return this
 }
@@ -37,7 +43,9 @@ inline fun <T> NetworkResult<T>.onSuccess(action: (T) -> Unit): NetworkResult<T>
  * @param action Receiver invoked with the failure cause; not called on success.
  * @return This [NetworkResult] unchanged, for chaining.
  */
-inline fun <T> NetworkResult<T>.onFailure(action: (Throwable) -> Unit): NetworkResult<T> {
+inline fun <T> NetworkResult<T>.onFailure(
+    action: (Throwable) -> Unit,
+): NetworkResult<T> {
     if (this is NetworkResult.Failure) action(cause)
     return this
 }
@@ -48,7 +56,9 @@ inline fun <T> NetworkResult<T>.onFailure(action: (Throwable) -> Unit): NetworkR
  * @param transform Mapping applied only when this is a [NetworkResult.Success].
  * @return A [NetworkResult] of the transformed type, preserving the original failure if any.
  */
-inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
+inline fun <T, R> NetworkResult<T>.map(
+    transform: (T) -> R,
+): NetworkResult<R> =
     when (this) {
         is NetworkResult.Success -> NetworkResult.Success(transform(value))
         is NetworkResult.Failure -> this
@@ -60,7 +70,9 @@ inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
  * @param transform Next operation, invoked only when this is a [NetworkResult.Success].
  * @return The result of [transform], or the original failure if any.
  */
-inline fun <T, R> NetworkResult<T>.flatMap(transform: (T) -> NetworkResult<R>): NetworkResult<R> =
+inline fun <T, R> NetworkResult<T>.flatMap(
+    transform: (T) -> NetworkResult<R>,
+): NetworkResult<R> =
     when (this) {
         is NetworkResult.Success -> transform(value)
         is NetworkResult.Failure -> this
@@ -75,7 +87,9 @@ inline fun <T, R> NetworkResult<T>.flatMap(transform: (T) -> NetworkResult<R>): 
  *
  * @param block Operation whose result becomes [NetworkResult.Success].
  */
-inline fun <T> catching(block: () -> T): NetworkResult<T> =
+inline fun <T> catching(
+    block: () -> T,
+): NetworkResult<T> =
     try {
         NetworkResult.Success(block())
     } catch (e: CancellationException) {

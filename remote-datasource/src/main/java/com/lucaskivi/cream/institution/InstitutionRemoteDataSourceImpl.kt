@@ -80,7 +80,9 @@ class InstitutionRemoteDataSourceImpl internal constructor(
             transformer.toTransactionDelta(response)
         }
 
-    override suspend fun disconnectInstitution(itemId: String): NetworkResult<Unit> =
+    override suspend fun disconnectInstitution(
+        itemId: String,
+    ): NetworkResult<Unit> =
         catching {
             val request = mapOf("itemId" to itemId)
             functions

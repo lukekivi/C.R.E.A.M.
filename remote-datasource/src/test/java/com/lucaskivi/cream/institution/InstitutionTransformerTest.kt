@@ -222,7 +222,9 @@ class InstitutionTransformerTest {
         @Test
         fun `maps added, modified, removed, and cursor`() {
             // Setup
-            fun txMap(id: String) = mapOf(
+            fun txMap(
+                id: String,
+            ) = mapOf(
                 "transactionId" to id,
                 "accountId" to "acc1",
                 "amount" to 1.0,
@@ -333,7 +335,9 @@ class InstitutionTransformerTest {
         @Test
         fun `maps every institution in the response`() {
             // Setup
-            fun institution(itemId: String) = mapOf(
+            fun institution(
+                itemId: String,
+            ) = mapOf(
                 "itemId" to itemId,
                 "institutionId" to "ins_3",
                 "institutionName" to "Chase",
