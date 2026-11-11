@@ -101,6 +101,25 @@ class InstitutionRepositoryImplTest {
     }
 
     @Nested
+    inner class CreateLinkToken {
+
+        @Test
+        fun `delegates to remote`() = runTest {
+            // Setup
+            val expected = NetworkResult.Success("lt-abc")
+            coEvery { remote.createLinkToken() } returns expected
+
+            // Test
+            val result = repo.createLinkToken()
+
+            // Verify
+            assertEquals(expected, result)
+            coVerify { remote.createLinkToken() }
+            confirmVerified(remote, local)
+        }
+    }
+
+    @Nested
     inner class LinkInstitution {
 
         @Test
