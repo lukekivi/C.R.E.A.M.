@@ -14,14 +14,20 @@ description: How to create a ViewModel in the CREAM project. Use this skill when
 ## Template
 
 ```kotlin
-class MyViewModel(private val myRepository: MyRepository) : ViewModel() {
+class MyViewModel(
+    private val myRepository: MyRepository,
+) : ViewModel() {
 
     // state, flows, etc.
 
     companion object {
-        fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
+        fun factory(
+            appContainer: AppContainer,
+        ) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>,
+            ): T =
                 MyViewModel(appContainer.myRepository) as T
         }
     }

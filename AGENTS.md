@@ -23,3 +23,13 @@ Epics and tickets live in `docs/specs/` as committed markdown files. See [docs/w
 ## Commits
 
 A commit message is an imperative subject line, a blank line, then a 3-line haiku (5-7-5) as the whole body. Never credit Claude in a commit: no `Co-Authored-By: Claude` trailer and no other mention. The `.githooks/commit-msg` hook strips Claude trailers and rejects any other body shape; enable it once per clone with `git config core.hooksPath .githooks`.
+
+Each commit adds only code it uses. Don't land a repository method, model, or helper in one commit for a later commit to call; ship it with its first caller. Split a commit only where each half stands on its own.
+
+Review fixes amend the commit that introduced the issue (`git commit --fixup` + autosquash), not a new commit on top.
+
+## Pull requests
+
+Split work into PRs a reviewer can read in one sitting, and split by feature slice, not by layer. Each PR is a working increment: a screen it adds is reachable in the app, and everything it adds is used. A UI-only PR or a data-only PR that nothing calls yet doesn't count.
+
+When one slice builds on another, stack the PRs: each branches from the one below and targets its branch, then retargets to `main` once that merges. Cross-cutting style changes (a new STYLE.md rule and the reformat it causes) go in their own PR at the bottom of the stack.

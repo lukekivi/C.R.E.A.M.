@@ -23,7 +23,9 @@ internal class InstitutionTransformer {
      *
      * @param response Response payload of the create-link-token request.
      */
-    fun toLinkToken(response: Map<String, Any?>): String =
+    fun toLinkToken(
+        response: Map<String, Any?>,
+    ): String =
         response["linkToken"] as String
 
     /**
@@ -60,7 +62,9 @@ internal class InstitutionTransformer {
      *
      * @param raw A single entry of the list-institutions `institutions` array.
      */
-    fun toLinkedInstitutionWithAccounts(raw: Map<String, Any?>): LinkedInstitutionWithAccounts {
+    fun toLinkedInstitutionWithAccounts(
+        raw: Map<String, Any?>,
+    ): LinkedInstitutionWithAccounts {
         val itemId = raw["itemId"] as String
         val institution = LinkedInstitution(
             itemId = itemId,
@@ -106,7 +110,9 @@ internal class InstitutionTransformer {
      *
      * @param raw FinancialAccount type string (e.g. "depository", "credit"), or null if absent.
      */
-    fun toFinancialAccountType(raw: String?): FinancialAccountType =
+    fun toFinancialAccountType(
+        raw: String?,
+    ): FinancialAccountType =
         when (raw?.lowercase()) {
             "credit" -> FinancialAccountType.CREDIT
             "depository" -> FinancialAccountType.DEPOSITORY
@@ -120,7 +126,9 @@ internal class InstitutionTransformer {
      *
      * @param response Response payload of the sync-transactions request.
      */
-    fun toTransactionDelta(response: Map<String, Any?>): TransactionDelta {
+    fun toTransactionDelta(
+        response: Map<String, Any?>,
+    ): TransactionDelta {
         val added = response["added"]
             .asMapList()
             .map { toTransaction(it) }
@@ -143,7 +151,9 @@ internal class InstitutionTransformer {
      *
      * @param raw A single entry of the `added` or `modified` array of a sync response.
      */
-    fun toTransaction(raw: Map<String, Any?>): Transaction =
+    fun toTransaction(
+        raw: Map<String, Any?>,
+    ): Transaction =
         Transaction(
             transactionId = raw["transactionId"] as String,
             accountId = raw["accountId"] as String,

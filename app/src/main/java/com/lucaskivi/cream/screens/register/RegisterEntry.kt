@@ -8,7 +8,9 @@ import com.lucaskivi.cream.navigation.MainRoute
  *
  * @param onNavigateBack Forwarded to [RegisterScreen] for the "Sign In" action.
  */
-fun EntryProviderScope<MainRoute>.registerEntry(onNavigateBack: () -> Unit) {
+fun EntryProviderScope<MainRoute>.registerEntry(
+    onNavigateBack: () -> Unit,
+) {
     entry<MainRoute.Register> {
         RegisterScreen(onNavigateBack = onNavigateBack)
     }

@@ -28,7 +28,9 @@ interface InstitutionDao {
      * @param accountId The account to observe.
      */
     @Query("SELECT * FROM financial_account WHERE accountId = :accountId")
-    fun observeAccount(accountId: String): Flow<FinancialAccountEntity?>
+    fun observeAccount(
+        accountId: String,
+    ): Flow<FinancialAccountEntity?>
 
     /**
      * Emits all transactions for [accountId], ordered newest-first by date.
@@ -36,7 +38,9 @@ interface InstitutionDao {
      * @param accountId The account whose transactions to observe.
      */
     @Query("SELECT * FROM `transaction` WHERE accountId = :accountId ORDER BY date DESC")
-    fun observeTransactions(accountId: String): Flow<List<TransactionEntity>>
+    fun observeTransactions(
+        accountId: String,
+    ): Flow<List<TransactionEntity>>
 
     /**
      * Inserts each institution that does not already exist. Existing rows — and crucially their
@@ -45,7 +49,9 @@ interface InstitutionDao {
      * @param institutions Institutions to insert.
      */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertInstitutionsIfAbsent(institutions: List<LinkedInstitutionEntity>)
+    suspend fun insertInstitutionsIfAbsent(
+        institutions: List<LinkedInstitutionEntity>,
+    )
 
     /**
      * Updates the [institutionId] and [institutionName] of the row identified by [itemId],
@@ -72,7 +78,9 @@ interface InstitutionDao {
      * @param accounts Accounts to upsert.
      */
     @Upsert
-    suspend fun upsertAccounts(accounts: List<FinancialAccountEntity>)
+    suspend fun upsertAccounts(
+        accounts: List<FinancialAccountEntity>,
+    )
 
     /**
      * Inserts or replaces each transaction in [transactions].
@@ -80,7 +88,9 @@ interface InstitutionDao {
      * @param transactions Transactions to upsert.
      */
     @Upsert
-    suspend fun upsertTransactions(transactions: List<TransactionEntity>)
+    suspend fun upsertTransactions(
+        transactions: List<TransactionEntity>,
+    )
 
     /**
      * Returns the stored transaction sync cursor for [itemId], or null if transactions have
@@ -89,7 +99,9 @@ interface InstitutionDao {
      * @param itemId The institution whose cursor to retrieve.
      */
     @Query("SELECT transactionCursor FROM linked_institution WHERE itemId = :itemId")
-    suspend fun getTransactionCursor(itemId: String): String?
+    suspend fun getTransactionCursor(
+        itemId: String,
+    ): String?
 
     /**
      * Persists [cursor] as the transaction sync cursor for the institution identified by [itemId].
@@ -112,7 +124,9 @@ interface InstitutionDao {
      * @param itemId The institution to delete.
      */
     @Query("DELETE FROM linked_institution WHERE itemId = :itemId")
-    suspend fun deleteInstitution(itemId: String)
+    suspend fun deleteInstitution(
+        itemId: String,
+    )
 
     /**
      * Deletes every institution and, via cascade, all accounts and transactions. Stored
@@ -127,5 +141,7 @@ interface InstitutionDao {
      * @param transactionIds IDs of the transactions to delete.
      */
     @Query("DELETE FROM `transaction` WHERE transactionId IN (:transactionIds)")
-    suspend fun deleteTransactions(transactionIds: List<String>)
+    suspend fun deleteTransactions(
+        transactionIds: List<String>,
+    )
 }

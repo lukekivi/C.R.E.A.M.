@@ -26,7 +26,9 @@ interface InstitutionRepository {
      *
      * @param accountId The account to observe.
      */
-    fun observeAccount(accountId: String): Flow<FinancialAccount?>
+    fun observeAccount(
+        accountId: String,
+    ): Flow<FinancialAccount?>
 
     /**
      * Emits all transactions for [accountId], ordered newest-first. Re-emits whenever any
@@ -34,7 +36,9 @@ interface InstitutionRepository {
      *
      * @param accountId The account whose transactions to observe.
      */
-    fun observeTransactions(accountId: String): Flow<List<Transaction>>
+    fun observeTransactions(
+        accountId: String,
+    ): Flow<List<Transaction>>
 
     /**
      * Completes the institution-linking flow and refreshes the local cache. Exchanges
@@ -60,7 +64,9 @@ interface InstitutionRepository {
      * @return [NetworkResult.Success] on success, or [NetworkResult.Failure] if the remote
      *   call fails. The local cache is only mutated on success.
      */
-    suspend fun syncTransactions(itemId: String): NetworkResult<Unit>
+    suspend fun syncTransactions(
+        itemId: String,
+    ): NetworkResult<Unit>
 
     /**
      * Unlinks the institution identified by [itemId] on the backend, then removes it — along
@@ -70,7 +76,9 @@ interface InstitutionRepository {
      * @return [NetworkResult.Success] on success, or [NetworkResult.Failure] if the remote
      *   call fails. The local cache is only mutated on success.
      */
-    suspend fun disconnectInstitution(itemId: String): NetworkResult<Unit>
+    suspend fun disconnectInstitution(
+        itemId: String,
+    ): NetworkResult<Unit>
 
     /**
      * Fetches the full institution and account list from the backend and writes it to the

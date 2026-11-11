@@ -35,7 +35,9 @@ import com.lucaskivi.cream.ui.LocalAppContainer
  * @param onNavigateBack Called when the user taps "Already have an account? Sign In".
  */
 @Composable
-fun RegisterScreen(onNavigateBack: () -> Unit) {
+fun RegisterScreen(
+    onNavigateBack: () -> Unit,
+) {
     val appContainer = LocalAppContainer.current
     val viewModel: RegisterViewModel = viewModel(factory = RegisterViewModel.factory(appContainer))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

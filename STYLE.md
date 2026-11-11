@@ -88,16 +88,20 @@ For `private` declarations, still prefer behavior-first phrasing. Only mention i
 
 ## Function and constructor parameters
 
-When a function, constructor, or class declaration has 2+ parameters, put each on its own line with a trailing comma. The closing paren (and return type, if any) goes on its own line.
+When a function, constructor, or class declaration has any parameters, put each on its own line with a trailing comma, even when there is only one. The closing paren (and return type, if any) goes on its own line.
 
 ```kotlin
 fun signInWithEmail(
     email: String,
     password: String,
 ): NetworkResult<User>
+
+fun observeTransactions(
+    accountId: String,
+): Flow<List<Transaction>>
 ```
 
-This applies to interfaces, abstract declarations, overrides, and concrete implementations alike.
+This applies to interfaces, abstract declarations, overrides, concrete implementations, and data classes alike. Adding or removing a parameter then touches only its own line. Lambdas and function types are exempt.
 
 ### Multi-line arguments
 
@@ -154,7 +158,7 @@ Inside an extension function, reference the receiver's members with an explicit 
 
 ## ViewModel formatting
 
-Every ViewModel primary constructor uses the per-line / trailing-comma format above, even for a single parameter:
+Every ViewModel primary constructor uses the per-line / trailing-comma format above:
 
 ```kotlin
 class FooViewModel(

@@ -51,7 +51,9 @@ interface AuthDataSource {
      * @param idToken Google ID token to exchange with Firebase.
      * @return [NetworkResult.Success] with the signed-in [User], or [NetworkResult.Failure] on any error.
      */
-    suspend fun signInWithGoogle(idToken: String): NetworkResult<User>
+    suspend fun signInWithGoogle(
+        idToken: String,
+    ): NetworkResult<User>
 
     /**
      * Signs the current user out and clears the local Firebase session.

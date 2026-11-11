@@ -65,9 +65,13 @@ class HomeViewModel(
          *
          * @param appContainer Source of the dependencies the ViewModel requires.
          */
-        fun factory(appContainer: AppContainer) = object : ViewModelProvider.Factory {
+        fun factory(
+            appContainer: AppContainer,
+        ) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>,
+            ): T =
                 HomeViewModel(
                     authRepository = appContainer.authRepository,
                     institutionRepository = appContainer.institutionRepository,
