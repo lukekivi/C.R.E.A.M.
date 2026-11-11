@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -224,6 +226,7 @@ private fun InstitutionList(
             item(key = institution.itemId) {
                 InstitutionHeader(
                     institution = institution,
+                    syncStatus = institutionItem.syncStatus,
                     onDisconnect = { onDisconnect(institution) },
                 )
             }
@@ -244,14 +247,16 @@ private fun InstitutionList(
 }
 
 /**
- * An institution's name and an overflow menu offering Disconnect.
+ * An institution's name, its transaction sync status, and an overflow menu offering Disconnect.
  *
  * @param institution The institution to show.
+ * @param syncStatus Where the institution's transaction sync stands.
  * @param onDisconnect Called when the user chooses Disconnect.
  */
 @Composable
 private fun InstitutionHeader(
     institution: LinkedInstitution,
+    syncStatus: InstitutionSyncStatus,
     onDisconnect: () -> Unit,
 ) {
     var isMenuOpen by remember { mutableStateOf(false) }
@@ -265,12 +270,14 @@ private fun InstitutionHeader(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = institution.institutionName,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f),
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = institution.institutionName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            SyncStatusLine(syncStatus)
+        }
         Box {
             IconButton(onClick = { isMenuOpen = true }) {
                 Icon(
@@ -290,6 +297,42 @@ private fun InstitutionHeader(
                     },
                 )
             }
+        }
+    }
+}
+
+/**
+ * A small status line for an institution's transaction sync: a spinner while syncing, a quiet
+ * error line after a failed sync, and nothing when idle.
+ *
+ * @param syncStatus Where the institution's transaction sync stands.
+ */
+@Composable
+private fun SyncStatusLine(
+    syncStatus: InstitutionSyncStatus,
+) {
+    when (syncStatus) {
+        InstitutionSyncStatus.Idle -> Unit
+        InstitutionSyncStatus.Syncing -> {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(12.dp),
+                    strokeWidth = 2.dp,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Syncing transactions…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        InstitutionSyncStatus.Failed -> {
+            Text(
+                text = "Couldn't sync transactions",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }
