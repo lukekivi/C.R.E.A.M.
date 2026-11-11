@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.lucaskivi.cream.navigation.MainRoute
+import com.lucaskivi.cream.screens.accountdetail.accountDetailEntry
 import com.lucaskivi.cream.screens.home.homeEntry
 import com.lucaskivi.cream.screens.institutions.institutionsEntry
 import com.lucaskivi.cream.screens.loading.loadingEntry
@@ -48,7 +49,11 @@ fun MainNavGraph() {
             loginEntry(onNavigateToRegister = { backStack.add(MainRoute.Register) })
             registerEntry(onNavigateBack = { backStack.removeLastOrNull() })
             homeEntry(onNavigateToInstitutions = { backStack.add(MainRoute.Institutions) })
-            institutionsEntry(onNavigateBack = { backStack.removeLastOrNull() })
+            institutionsEntry(
+                onNavigateBack = { backStack.removeLastOrNull() },
+                onAccountClick = { accountId -> backStack.add(MainRoute.AccountDetail(accountId)) },
+            )
+            accountDetailEntry(onNavigateBack = { route -> backStack.remove(route) })
         }
     )
 }

@@ -30,4 +30,13 @@ sealed class MainRoute {
      * Linked institutions, with their accounts and balances.
      */
     data object Institutions : MainRoute()
+
+    /**
+     * Detail destination for a single financial account.
+     *
+     * @property accountId The account to show.
+     */
+    data class AccountDetail(
+        val accountId: String,
+    ) : MainRoute()
 }
