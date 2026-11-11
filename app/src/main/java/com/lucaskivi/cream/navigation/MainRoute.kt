@@ -25,4 +25,9 @@ sealed class MainRoute {
      * Primary destination shown to a signed-in user.
      */
     data object Home : MainRoute()
+
+    /**
+     * Linked institutions, with their accounts and balances.
+     */
+    data object Institutions : MainRoute()
 }

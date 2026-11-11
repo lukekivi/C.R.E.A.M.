@@ -221,6 +221,31 @@ sealed interface FooContent {
 }
 ```
 
+## Events
+
+A one-time instruction from a ViewModel to its screen (open an external flow, show a toast, navigate) is an event, not state. Events go on a separate `events` flow backed by a `Channel`, never in the `UiState`. The screen handles them with `EventsEffect`.
+
+```kotlin
+private val eventChannel = Channel<FooEvent>(Channel.BUFFERED)
+val events: Flow<FooEvent> = eventChannel.receiveAsFlow()
+
+sealed interface FooEvent {
+    data class OpenLink(
+        val linkToken: String,
+    ) : FooEvent
+}
+```
+
+```kotlin
+EventsEffect(viewModel.events) { event ->
+    when (event) {
+        is FooEvent.OpenLink -> {
+            linkLauncher.launch(event.linkToken)
+        }
+    }
+}
+```
+
 ## Packages
 
 - A feature package holds behavior: interfaces, implementations, factories, composables.

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -27,10 +28,15 @@ import com.lucaskivi.cream.data.model.User
 import com.lucaskivi.cream.ui.LocalAppContainer
 
 /**
- * Home screen showing the signed-in user's profile and a sign-out action.
+ * Home screen showing the signed-in user's profile, a way to their linked institutions, and a
+ * sign-out action.
+ *
+ * @param onNavigateToInstitutions Called when the user opens their linked institutions.
  */
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onNavigateToInstitutions: () -> Unit,
+) {
     val appContainer = LocalAppContainer.current
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(appContainer))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -45,6 +51,13 @@ fun HomeScreen() {
         Spacer(Modifier.height(48.dp))
         ProfileSection(user = uiState.currentUser)
         Spacer(Modifier.height(32.dp))
+        Button(
+            onClick = onNavigateToInstitutions,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Institutions")
+        }
+        Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = viewModel::signOut,
             modifier = Modifier.fillMaxWidth(),

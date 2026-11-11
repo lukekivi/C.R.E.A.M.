@@ -41,6 +41,14 @@ interface InstitutionRepository {
     ): Flow<List<Transaction>>
 
     /**
+     * Creates a short-lived token that starts the institution-linking UI flow.
+     *
+     * @return [NetworkResult.Success] with the link token, or [NetworkResult.Failure] if the
+     *   remote call fails.
+     */
+    suspend fun createLinkToken(): NetworkResult<String>
+
+    /**
      * Completes the institution-linking flow and refreshes the local cache. Exchanges
      * [publicToken] with the backend, then fetches the updated institution and account list.
      *
