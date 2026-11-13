@@ -130,6 +130,21 @@ fun <T : ViewModel> create(
 
 This minimizes diff churn if the body later needs to grow into a block body — only the header line changes (`=` → `{`) and a closing `}` is added; the body line stays put.
 
+## When branches
+
+When a `when` branch's body spans more than one line, wrap it in curly braces. Single-line branches stay bare. A branch with several conditions puts each condition on its own line.
+
+```kotlin
+when (state) {
+    Status.Idle,
+    Status.Loading -> Unit
+    is Status.Failed -> {
+        logger.log(state.cause)
+        retryCount++
+    }
+}
+```
+
 ## Method chains
 
 When chaining two or more method calls (`.foo().bar()`), put the receiver alone on the first line, then each call on its own line, indented one level deeper. A constructor call such as `Foo.Builder()` counts as the receiver.
