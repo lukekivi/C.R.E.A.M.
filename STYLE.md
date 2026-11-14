@@ -130,6 +130,21 @@ fun <T : ViewModel> create(
 
 This minimizes diff churn if the body later needs to grow into a block body — only the header line changes (`=` → `{`) and a closing `}` is added; the body line stays put.
 
+## When branches
+
+When a `when` branch's body spans more than one line, wrap it in curly braces. Single-line branches stay bare.
+
+```kotlin
+when (result) {
+    InstitutionLinkResult.Cancelled -> mutableUiState.update { it.copy(isLinking = false) }
+    is InstitutionLinkResult.Error -> {
+        mutableUiState.update {
+            it.copy(isLinking = false, error = result.message)
+        }
+    }
+}
+```
+
 ## Method chains
 
 When chaining two or more method calls (`.foo().bar()`), put the receiver alone on the first line, then each call on its own line, indented one level deeper. A constructor call such as `Foo.Builder()` counts as the receiver.
@@ -169,6 +184,35 @@ class FooViewModel(
 ```
 
 The `UiState` data class is defined **below** the ViewModel class, not above. The ViewModel is the primary declaration; UiState is a supporting type.
+
+## Declarative UiState
+
+A `UiState` describes what the screen shows right now, and the composable draws it as-is. Shape it so the screen never derives what to show from a combination of fields.
+
+- Model mutually exclusive states as a sealed interface (`Loading` / `Empty` / `Loaded(...)`), not as boolean flags next to a list the screen has to inspect.
+- No one-time events. A field the screen consumes once and then acknowledges (`pendingX` + `onXLaunched()`, `error` + `clearError()` called from a `LaunchedEffect`) is an event, not state. A message or dialog is state: it stays in `UiState` until the user dismisses it.
+- Effects that only Android can perform (e.g. starting another activity) are driven from state in a `LaunchedEffect`, with no acknowledgment sent back to the ViewModel.
+
+```kotlin
+data class FooUiState(
+    val content: FooContent = FooContent.Loading,
+    val dialog: FooDialog? = null,
+)
+
+sealed interface FooContent {
+    data object Loading : FooContent
+    data object Empty : FooContent
+    data class Loaded(
+        val items: List<Item>,
+    ) : FooContent
+}
+
+sealed interface FooDialog {
+    data class Error(
+        val message: String,
+    ) : FooDialog
+}
+```
 
 ## Packages
 

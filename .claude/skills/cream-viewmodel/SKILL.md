@@ -60,3 +60,4 @@ If the ViewModel needs a repository that doesn't exist yet:
 - The companion `factory` always takes `AppContainer`, not individual repositories. This keeps call sites uniform and means the VM owns the knowledge of which dependency it needs.
 - `LocalAppContainer` is provided once at the root in `MainActivity` — never re-provided lower in the tree.
 - No Hilt, no Koin, no service locator pattern elsewhere.
+- `UiState` describes what the screen shows, with no one-time events. See "Declarative UiState" in STYLE.md.
