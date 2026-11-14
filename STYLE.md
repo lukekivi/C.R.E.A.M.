@@ -185,6 +185,35 @@ class FooViewModel(
 
 The `UiState` data class is defined **below** the ViewModel class, not above. The ViewModel is the primary declaration; UiState is a supporting type.
 
+## Declarative UiState
+
+A `UiState` describes what the screen shows right now, and the composable draws it as-is. Shape it so the screen never derives what to show from a combination of fields.
+
+- Model mutually exclusive states as a sealed interface (`Loading` / `Empty` / `Loaded(...)`), not as boolean flags next to a list the screen has to inspect.
+- No one-time events. A field the screen consumes once and then acknowledges (`pendingX` + `onXLaunched()`, `error` + `clearError()` called from a `LaunchedEffect`) is an event, not state. A message or dialog is state: it stays in `UiState` until the user dismisses it.
+- Effects that only Android can perform (e.g. starting another activity) are driven from state in a `LaunchedEffect`, with no acknowledgment sent back to the ViewModel.
+
+```kotlin
+data class FooUiState(
+    val content: FooContent = FooContent.Loading,
+    val dialog: FooDialog? = null,
+)
+
+sealed interface FooContent {
+    data object Loading : FooContent
+    data object Empty : FooContent
+    data class Loaded(
+        val items: List<Item>,
+    ) : FooContent
+}
+
+sealed interface FooDialog {
+    data class Error(
+        val message: String,
+    ) : FooDialog
+}
+```
+
 ## Packages
 
 - A feature package holds behavior: interfaces, implementations, factories, composables.
