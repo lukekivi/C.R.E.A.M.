@@ -92,9 +92,6 @@ class InstitutionRemoteDataSourceImpl internal constructor(
             Unit
         }
 
-    /**
-     * Backend callable function names.
-     */
     internal companion object {
         /**
          * Callable name for [InstitutionRemoteDataSource.createLinkToken].

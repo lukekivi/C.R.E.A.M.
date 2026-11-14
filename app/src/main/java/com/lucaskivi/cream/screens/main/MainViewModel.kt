@@ -46,9 +46,6 @@ class MainViewModel(
         }
     }
 
-    /**
-     * Factory entry points for [MainViewModel].
-     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [MainViewModel] from [appContainer].
