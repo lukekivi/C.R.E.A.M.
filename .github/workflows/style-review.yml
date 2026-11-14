@@ -1,19 +1,38 @@
-# Style-reviews every non-draft PR and records the findings in the category database.
+# Style-reviews each PR once, when it's first opened or first marked ready, and records the findings in the category database.
 # See docs/style-review.md.
 name: Style review
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+    types: [opened, ready_for_review]
 
 concurrency:
   group: style-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  review:
+  check:
     # Fork PRs get neither an OIDC token nor a writable GITHUB_TOKEN, so the review can't run.
     if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      reviewed: ${{ steps.summary.outputs.reviewed }}
+    steps:
+      # A PR toggled back to draft and ready again fires ready_for_review again; only the first counts.
+      - id: summary
+        run: |
+          ids=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" --paginate \
+            --jq '.[] | select(.user.type == "Bot" and (.body | contains("<!-- style-review-summary -->"))) | .id')
+          echo "reviewed=$([ -n "$ids" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+  review:
+    needs: check
+    if: ${{ needs.check.outputs.reviewed == 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -48,4 +67,4 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REF: ${{ github.head_ref }}
-          STYLE_REVIEW_MODEL: claude-sonnet-5-5
+          STYLE_REVIEW_MODEL: claude-haiku-5-5
