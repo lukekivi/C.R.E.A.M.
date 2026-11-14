@@ -9,6 +9,7 @@ Every Kotlin declaration gets a KDoc comment — class, interface, object, funct
 Exceptions:
 - Local declarations inside a function body.
 - Test sources. Test classes, tests, and test helpers don't get KDoc.
+- Companion objects. Their members are documented instead.
 - `override` members — they inherit KDoc from the supertype declaration. Only add KDoc on an override if its behavior diverges from the parent contract in a way the caller needs to know.
 
 KDoc is always **multiline**, even for one-sentence comments. Never use the single-line `/** ... */` form anywhere; where a multiline KDoc isn't wanted, a `//` comment is fine.

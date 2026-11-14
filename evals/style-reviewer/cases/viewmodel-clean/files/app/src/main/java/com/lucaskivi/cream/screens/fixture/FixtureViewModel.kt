@@ -45,9 +45,6 @@ class FixtureViewModel(
     fun hasUser(): Boolean =
         authRepository.currentUser != null
 
-    /**
-     * Builds [FixtureViewModel] instances.
-     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [FixtureViewModel] from [appContainer].

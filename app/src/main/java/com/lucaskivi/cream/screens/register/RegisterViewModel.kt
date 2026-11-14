@@ -54,9 +54,6 @@ class RegisterViewModel(
         }
     }
 
-    /**
-     * Factory entry points for [RegisterViewModel].
-     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [RegisterViewModel] from [appContainer].

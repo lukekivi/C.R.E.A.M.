@@ -56,9 +56,6 @@ class HomeViewModel(
         }
     }
 
-    /**
-     * Factory entry points for [HomeViewModel].
-     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [HomeViewModel] from [appContainer].

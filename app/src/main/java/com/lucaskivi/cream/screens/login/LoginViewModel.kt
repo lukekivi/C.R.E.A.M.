@@ -102,9 +102,6 @@ class LoginViewModel(
     fun clearError() =
         mutableUiState.update { it.copy(error = null) }
 
-    /**
-     * Factory entry points for [LoginViewModel].
-     */
     companion object {
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [LoginViewModel] from [appContainer].
