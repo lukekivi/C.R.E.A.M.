@@ -196,6 +196,15 @@ The `UiState` data class is defined **below** the ViewModel class, not above. Th
 
 Companion objects are declared at the end of the class body, after all other members.
 
+## Constants
+
+These rules cover non-UI constants for now.
+
+- Declare constants as `const val` named in `SCREAMING_SNAKE_CASE`.
+- A class's constants go in its companion object, not at the top level of the file, so they sit at the end of the class.
+- A file with no class keeps its constants at the bottom of the file.
+- Keep a constant `private` unless code outside its class uses it.
+
 ## Tests
 
 Group a test class's tests by the method under test, each group in a JUnit 5 `@Nested inner class` named after that method. Test names then describe only the behavior. Don't use `// region` comments.
