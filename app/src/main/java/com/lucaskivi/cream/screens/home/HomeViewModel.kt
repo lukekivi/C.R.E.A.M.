@@ -40,7 +40,11 @@ class HomeViewModel(
     init {
         viewModelScope.launch {
             authRepository.authStateFlow.collect { user ->
-                mutableUiState.update { it.copy(currentUser = user) }
+                mutableUiState.update {
+                    it.copy(
+                        currentUser = user,
+                    )
+                }
             }
         }
     }

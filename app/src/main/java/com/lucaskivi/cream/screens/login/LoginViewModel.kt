@@ -53,11 +53,16 @@ class LoginViewModel(
         password: String,
     ) {
         viewModelScope.launch {
-            mutableUiState.update { it.copy(isLoading = true, error = null) }
+            mutableUiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                )
+            }
             authRepository
                 .signInWithEmail(email, password)
-                .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
-                .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
+                .onSuccess { handleSignedIn() }
+                .onFailure(::handleFailure)
         }
     }
 
@@ -74,7 +79,12 @@ class LoginViewModel(
         context: Context,
     ) {
         viewModelScope.launch {
-            mutableUiState.update { it.copy(isLoading = true, error = null) }
+            mutableUiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                )
+            }
             try {
                 val credentialManager = CredentialManager.create(context)
                 val googleIdOption = GetGoogleIdOption.Builder()
@@ -88,10 +98,10 @@ class LoginViewModel(
                 val idToken = GoogleIdTokenCredential.createFrom(result.credential.data).idToken
                 authRepository
                     .signInWithGoogle(idToken)
-                    .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
-                    .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
+                    .onSuccess { handleSignedIn() }
+                    .onFailure(::handleFailure)
             } catch (e: GetCredentialException) {
-                mutableUiState.update { it.copy(isLoading = false, error = e.message) }
+                handleFailure(e)
             }
         }
     }
@@ -100,7 +110,38 @@ class LoginViewModel(
      * Clears any error currently displayed in [uiState].
      */
     fun clearError() =
-        mutableUiState.update { it.copy(error = null) }
+        mutableUiState.update {
+            it.copy(
+                error = null,
+            )
+        }
+
+    /**
+     * Ends the sign-in request after it succeeds.
+     */
+    private fun handleSignedIn() {
+        mutableUiState.update {
+            it.copy(
+                isLoading = false,
+            )
+        }
+    }
+
+    /**
+     * Ends the sign-in request and shows why it failed.
+     *
+     * @param cause Why the request failed.
+     */
+    private fun handleFailure(
+        cause: Throwable,
+    ) {
+        mutableUiState.update {
+            it.copy(
+                isLoading = false,
+                error = cause.message,
+            )
+        }
+    }
 
     companion object {
         /**

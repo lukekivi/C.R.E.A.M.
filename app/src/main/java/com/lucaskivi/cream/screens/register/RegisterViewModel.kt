@@ -46,11 +46,43 @@ class RegisterViewModel(
         password: String,
     ) {
         viewModelScope.launch {
-            mutableUiState.update { it.copy(isLoading = true, error = null) }
+            mutableUiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                )
+            }
             authRepository
                 .createUserWithEmail(email, password)
-                .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
-                .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
+                .onSuccess { handleAccountCreated() }
+                .onFailure(::handleFailure)
+        }
+    }
+
+    /**
+     * Ends the account-creation request after it succeeds.
+     */
+    private fun handleAccountCreated() {
+        mutableUiState.update {
+            it.copy(
+                isLoading = false,
+            )
+        }
+    }
+
+    /**
+     * Ends the account-creation request and shows why it failed.
+     *
+     * @param cause Why the request failed.
+     */
+    private fun handleFailure(
+        cause: Throwable,
+    ) {
+        mutableUiState.update {
+            it.copy(
+                isLoading = false,
+                error = cause.message,
+            )
         }
     }
 

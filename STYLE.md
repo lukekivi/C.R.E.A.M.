@@ -118,6 +118,20 @@ val response = functions
     .call(request)
 ```
 
+### `copy` calls
+
+Put each `copy(...)` argument on its own line, named, with a trailing comma, even when there is only one. An argument that takes more than a name or property access (an elvis, a call, a string template) goes in a local `val` first.
+
+```kotlin
+val errorMessage = cause.message ?: SIGN_IN_FAILED_MESSAGE
+mutableUiState.update {
+    it.copy(
+        isLoading = false,
+        errorMessage = errorMessage,
+    )
+}
+```
+
 ## Expression-body functions
 
 When a function uses `=` to specify an expression body, place the body expression on a new line, indented under the function header. Do not write `=` and the body on the same line.
@@ -153,8 +167,8 @@ When chaining two or more method calls (`.foo().bar()`), put the receiver alone 
 ```kotlin
 authRepository
     .signInWithEmail(email, password)
-    .onSuccess { mutableUiState.update { it.copy(isLoading = false) } }
-    .onFailure { cause -> mutableUiState.update { it.copy(isLoading = false, error = cause.message) } }
+    .onSuccess { handleSignedIn() }
+    .onFailure(::handleFailure)
 ```
 
 Single-call chains (`foo.bar()`) stay on one line. Builder-style chains follow the same rule:
