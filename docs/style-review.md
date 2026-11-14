@@ -17,7 +17,7 @@ tickets, ADRs, agent config, and generated or lock files (`EXCLUDED_PATHS` in `a
 | [`.claude/agents/style-reviewer.md`](../.claude/agents/style-reviewer.md) | The reviewer. Read-only, and says nothing about output format, so it also works conversationally. |
 | [`findings.schema.json`](../scripts/style-review/findings.schema.json) | The output contract. The scripts pass it to `claude --json-schema`, which makes the reviewer return validated JSON: findings ordered by importance, any new categories, and notes. |
 | Category database | Firestore database `style-review` in the Firebase project. Each category has an id, a general description of the issue, its source (the doc or skill stating the convention, or `codebase`), and whether it's mechanical enough to lint. Every finding is stored under its category as an occurrence, with the flagged code. See [`store.py`](../scripts/style-review/store.py). |
-| [`.github/workflows/style-review.yml`](../.github/workflows/style-review.yml) + [`ci.py`](../scripts/style-review/ci.py) | Reviews each PR on open and on every push. Comments inline on the 5 most important findings (only ones not already on the PR), keeps one summary comment listing every finding, and records every finding in the category database. |
+| [`.github/workflows/style-review.yml`](../.github/workflows/style-review.yml) + [`ci.py`](../scripts/style-review/ci.py) | Reviews each PR once: when it's opened, or first marked ready if opened as a draft. Comments inline on the 5 most important findings (only ones not already on the PR), keeps one summary comment listing every finding, and records every finding in the category database. |
 | [`scripts/style-review/report.py`](../scripts/style-review/report.py) | Ranks the categories and suggests a fix for each recurring one, with examples of the flagged code. |
 | [`evals/style-reviewer/`](../evals/style-reviewer/) + [`eval.py`](../scripts/style-review/eval.py) | Scores the reviewer's recall and false positives against checked-in cases. Run locally; not run in CI. |
 
@@ -25,7 +25,7 @@ tickets, ADRs, agent config, and generated or lock files (`EXCLUDED_PATHS` in `a
 
 ### On every PR
 
-1. **A PR changes code.** Each time a PR is opened or pushed to, a review starts.
+1. **A PR is ready.** When a PR is opened, or first marked ready for review if opened as a draft, a review starts. Later pushes aren't reviewed.
 2. **The reviewer finds problems.** A Claude agent compares the changed code with how the repo says things should be done (STYLE.md, skills) and how its existing code does them. Every place the change departs from those is a problem.
 3. **Each problem is filed under a category.** Along with the change, the reviewer gets the list of categories past reviews have filed problems under: named kinds of mistake, like "missing KDoc". It files each problem it found under the matching one, so the same mistake is counted together across PRs. When no category fits, the reviewer creates one: a name, a description general enough to recur, and where the convention comes from. It's added to the list, so later reviews file the same mistake under it.
 4. **The author hears about it.** The 5 most important problems become inline comments; a summary comment lists them all.
@@ -41,7 +41,7 @@ Review comments fix one PR. The point of categorizing and collecting every probl
 
 ### 1. Trigger
 
-[`style-review.yml`](../.github/workflows/style-review.yml) runs on `opened`, `reopened`, `synchronize`, and `ready_for_review`, for non-draft PRs from this repo (fork PRs get no OIDC token). A newer push cancels the PR's in-progress run. The job checks out the head commit, installs Claude Code and the Python requirements, authenticates to Google Cloud with `google-github-actions/auth`, and runs [`ci.py`](../scripts/style-review/ci.py).
+[`style-review.yml`](../.github/workflows/style-review.yml) runs on `opened` and `ready_for_review`, for non-draft PRs from this repo (fork PRs get no OIDC token). A first `check` job skips the review if the PR already has a summary comment, so a PR toggled back to draft and ready again isn't re-reviewed. To re-review, delete the summary comment and mark the PR draft then ready. The job checks out the head commit, installs Claude Code and the Python requirements, authenticates to Google Cloud with `google-github-actions/auth`, and runs [`ci.py`](../scripts/style-review/ci.py).
 
 ### 2. Review
 
