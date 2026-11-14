@@ -110,9 +110,9 @@ fun RegisterScreen(
             Text("Already have an account? Sign In")
         }
 
-        uiState.error?.let { error ->
+        uiState.errorMessage?.let { errorMessage ->
             Spacer(Modifier.height(12.dp))
-            Text(error, color = MaterialTheme.colorScheme.error)
+            Text(errorMessage, color = MaterialTheme.colorScheme.error)
         }
     }
 }

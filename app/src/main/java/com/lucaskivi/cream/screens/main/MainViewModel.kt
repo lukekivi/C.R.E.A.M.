@@ -3,13 +3,15 @@ package com.lucaskivi.cream.screens.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.lucaskivi.cream.data.repository.auth.AuthRepository
 import com.lucaskivi.cream.data.di.AppContainer
+import com.lucaskivi.cream.data.model.User
+import com.lucaskivi.cream.data.repository.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 /**
  * Observes Firebase auth state and exposes it as [uiState].
@@ -26,7 +28,7 @@ class MainViewModel(
     /**
      * Mutable backing flow for [uiState].
      */
-    private val mutableUiState = MutableStateFlow(MainUiState())
+    private val mutableUiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
 
     /**
      * Observable auth state for the root navigation graph.
@@ -34,16 +36,23 @@ class MainViewModel(
     val uiState: StateFlow<MainUiState> = mutableUiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            authRepository.authStateFlow.collect { user ->
-                mutableUiState.update {
-                    it.copy(
-                        isInitialized = true,
-                        isAuthenticated = user != null,
-                    )
-                }
-            }
-        }
+        authRepository
+            .authStateFlow
+            .onEach(::handleUser)
+            .launchIn(viewModelScope)
+    }
+
+    /**
+     * Moves [uiState] to [MainUiState.SignedIn] when [user] is present, otherwise
+     * [MainUiState.SignedOut].
+     *
+     * @param user The signed-in user, or null when signed out.
+     */
+    private fun handleUser(
+        user: User?,
+    ) {
+        val nextState = if (user == null) MainUiState.SignedOut else MainUiState.SignedIn
+        mutableUiState.update { nextState }
     }
 
     companion object {
@@ -67,11 +76,21 @@ class MainViewModel(
 
 /**
  * UI state for the root auth observer.
- *
- * @property isInitialized Whether the initial auth state has been received.
- * @property isAuthenticated Whether a user is currently signed in.
  */
-data class MainUiState(
-    val isInitialized: Boolean = false,
-    val isAuthenticated: Boolean = false,
-)
+sealed interface MainUiState {
+
+    /**
+     * The initial auth state hasn't been received yet.
+     */
+    data object Loading : MainUiState
+
+    /**
+     * No user is signed in.
+     */
+    data object SignedOut : MainUiState
+
+    /**
+     * A user is signed in.
+     */
+    data object SignedIn : MainUiState
+}

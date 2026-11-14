@@ -43,7 +43,7 @@ class LoginViewModel(
      * Attempts to sign in with [email] and [password], updating [uiState] with the result.
      *
      * Sets `isLoading` while the request is in flight and surfaces any failure message
-     * in `error` on completion.
+     * in `errorMessage` on completion.
      *
      * @param email Email address of an existing account.
      * @param password Password for that account.
@@ -56,7 +56,7 @@ class LoginViewModel(
             mutableUiState.update {
                 it.copy(
                     isLoading = true,
-                    error = null,
+                    errorMessage = null,
                 )
             }
             authRepository
@@ -82,7 +82,7 @@ class LoginViewModel(
             mutableUiState.update {
                 it.copy(
                     isLoading = true,
-                    error = null,
+                    errorMessage = null,
                 )
             }
             try {
@@ -107,16 +107,6 @@ class LoginViewModel(
     }
 
     /**
-     * Clears any error currently displayed in [uiState].
-     */
-    fun clearError() =
-        mutableUiState.update {
-            it.copy(
-                error = null,
-            )
-        }
-
-    /**
      * Ends the sign-in request after it succeeds.
      */
     private fun handleSignedIn() {
@@ -135,15 +125,21 @@ class LoginViewModel(
     private fun handleFailure(
         cause: Throwable,
     ) {
+        val errorMessage = cause.message ?: SIGN_IN_FAILED_MESSAGE
         mutableUiState.update {
             it.copy(
                 isLoading = false,
-                error = cause.message,
+                errorMessage = errorMessage,
             )
         }
     }
 
     companion object {
+        /**
+         * Message shown when a sign-in failure carries no message of its own.
+         */
+        private const val SIGN_IN_FAILED_MESSAGE = "Couldn't sign in. Please try again."
+
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [LoginViewModel] from [appContainer].
          *
@@ -166,9 +162,9 @@ class LoginViewModel(
  * UI state for the login screen.
  *
  * @property isLoading Whether a sign-in request is in flight.
- * @property error Human-readable error message from the last failed attempt, or null.
+ * @property errorMessage Why the last attempt failed, or null.
  */
 data class LoginUiState(
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val errorMessage: String? = null,
 )
