@@ -42,7 +42,7 @@ class InstitutionLinkLauncherTest {
         fun `maps a success without an institution to the fallback Error`() {
             // Setup
             val linkResult = linkSuccess(institution = null)
-            val expected = InstitutionLinkResult.Error(INSTITUTION_LINK_FALLBACK_ERROR_MESSAGE)
+            val expected = InstitutionLinkResult.Error(InstitutionLinkLauncher.FALLBACK_ERROR_MESSAGE)
 
             // Test
             val result = linkResult.toInstitutionLinkResult()
@@ -108,7 +108,7 @@ class InstitutionLinkLauncherTest {
         fun `falls back to the generic message when both messages are blank`() {
             // Setup
             val linkResult = linkExit(errorMessage = "  ", displayMessage = null)
-            val expected = InstitutionLinkResult.Error(INSTITUTION_LINK_FALLBACK_ERROR_MESSAGE)
+            val expected = InstitutionLinkResult.Error(InstitutionLinkLauncher.FALLBACK_ERROR_MESSAGE)
 
             // Test
             val result = linkResult.toInstitutionLinkResult()

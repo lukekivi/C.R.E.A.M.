@@ -17,11 +17,6 @@ import com.plaid.link.result.LinkResult
 import com.plaid.link.result.LinkSuccess
 
 /**
- * Message used for an [InstitutionLinkResult.Error] when the link flow gives no usable explanation.
- */
-internal const val INSTITUTION_LINK_FALLBACK_ERROR_MESSAGE = "Couldn't link the institution. Please try again."
-
-/**
  * Handle for starting the institution-linking flow, obtained from
  * [rememberInstitutionLinkLauncher].
  *
@@ -46,6 +41,14 @@ class InstitutionLinkLauncher internal constructor(
         val configuration = linkTokenConfiguration { token = linkToken }
         val session = Plaid.createPlaidLinkSession(context, configuration)
         activityResultLauncher.launch(session)
+    }
+
+    companion object {
+        /**
+         * Message used for an [InstitutionLinkResult.Error] when the link flow gives no usable
+         * explanation.
+         */
+        internal const val FALLBACK_ERROR_MESSAGE = "Couldn't link the institution. Please try again."
     }
 }
 
@@ -92,7 +95,7 @@ internal fun LinkResult.toInstitutionLinkResult(): InstitutionLinkResult =
 private fun LinkSuccess.toInstitutionLinkResult(): InstitutionLinkResult {
     val institution = this.metadata.institution
     return if (institution == null) {
-        InstitutionLinkResult.Error(INSTITUTION_LINK_FALLBACK_ERROR_MESSAGE)
+        InstitutionLinkResult.Error(InstitutionLinkLauncher.FALLBACK_ERROR_MESSAGE)
     } else {
         InstitutionLinkResult.Success(
             publicToken = this.publicToken,
@@ -104,12 +107,12 @@ private fun LinkSuccess.toInstitutionLinkResult(): InstitutionLinkResult {
 
 /**
  * Translates a [LinkError] into an [InstitutionLinkResult.Error], preferring the user-facing
- * message, then the developer-facing one, then [INSTITUTION_LINK_FALLBACK_ERROR_MESSAGE]. Blank
- * messages are skipped.
+ * message, then the developer-facing one, then [InstitutionLinkLauncher.FALLBACK_ERROR_MESSAGE].
+ * Blank messages are skipped.
  */
 private fun LinkError.toInstitutionLinkError(): InstitutionLinkResult.Error {
     val message = this.displayMessage?.takeIf { it.isNotBlank() }
         ?: this.errorMessage.takeIf { it.isNotBlank() }
-        ?: INSTITUTION_LINK_FALLBACK_ERROR_MESSAGE
+        ?: InstitutionLinkLauncher.FALLBACK_ERROR_MESSAGE
     return InstitutionLinkResult.Error(message)
 }
