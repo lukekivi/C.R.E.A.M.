@@ -198,7 +198,28 @@ class FooViewModel(
 ) : ViewModel() {
 ```
 
-The `UiState` data class is defined **below** the ViewModel class, not above. The ViewModel is the primary declaration; UiState is a supporting type.
+The `UiState` type is defined **below** the ViewModel class, not above. The ViewModel is the primary declaration; UiState is a supporting type.
+
+Change `mutableUiState` with `update { }`, not by assigning its `value`.
+
+## Declarative UiState
+
+A `UiState` should describe what the screen shows, so the composable can render it directly. Use a sealed interface when the screen has distinct states (such as `Loading`, `Empty`, and `Loaded`); otherwise, plain properties are enough.
+
+```kotlin
+data class FooUiState(
+    val content: FooContent = FooContent.Loading,
+    val isRefreshing: Boolean = false,
+)
+
+sealed interface FooContent {
+    data object Loading : FooContent
+    data object Empty : FooContent
+    data class Loaded(
+        val items: List<Item>,
+    ) : FooContent
+}
+```
 
 ## Packages
 

@@ -31,11 +31,15 @@ fun MainNavGraph() {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val backStack = remember { mutableStateListOf<MainRoute>(MainRoute.Loading) }
 
-    LaunchedEffect(uiState.isInitialized, uiState.isAuthenticated) {
-        if (uiState.isInitialized) {
-            val destination = if (uiState.isAuthenticated) MainRoute.Home else MainRoute.Login
+    LaunchedEffect(uiState) {
+        val destination = when (uiState) {
+            MainUiState.Loading -> null
+            MainUiState.SignedOut -> MainRoute.Login
+            MainUiState.SignedIn -> MainRoute.Home
+        }
+        destination?.let {
             backStack.clear()
-            backStack.add(destination)
+            backStack.add(it)
         }
     }
 

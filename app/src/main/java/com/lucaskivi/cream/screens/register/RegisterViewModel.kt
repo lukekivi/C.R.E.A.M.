@@ -36,7 +36,7 @@ class RegisterViewModel(
      * Attempts to create a new account with [email] and [password], updating [uiState] with the result.
      *
      * Sets `isLoading` while the request is in flight and surfaces any failure message
-     * in `error` on completion.
+     * in `errorMessage` on completion.
      *
      * @param email Email address to register.
      * @param password Password for the new account.
@@ -49,7 +49,7 @@ class RegisterViewModel(
             mutableUiState.update {
                 it.copy(
                     isLoading = true,
-                    error = null,
+                    errorMessage = null,
                 )
             }
             authRepository
@@ -78,15 +78,21 @@ class RegisterViewModel(
     private fun handleFailure(
         cause: Throwable,
     ) {
+        val errorMessage = cause.message ?: CREATE_ACCOUNT_FAILED_MESSAGE
         mutableUiState.update {
             it.copy(
                 isLoading = false,
-                error = cause.message,
+                errorMessage = errorMessage,
             )
         }
     }
 
     companion object {
+        /**
+         * Message shown when an account-creation failure carries no message of its own.
+         */
+        private const val CREATE_ACCOUNT_FAILED_MESSAGE = "Couldn't create your account. Please try again."
+
         /**
          * Returns a [ViewModelProvider.Factory] that constructs [RegisterViewModel] from [appContainer].
          *
@@ -109,9 +115,9 @@ class RegisterViewModel(
  * UI state for the registration screen.
  *
  * @property isLoading Whether an account-creation request is in flight.
- * @property error Human-readable error message from the last failed attempt, or null.
+ * @property errorMessage Why the last attempt failed, or null.
  */
 data class RegisterUiState(
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val errorMessage: String? = null,
 )
