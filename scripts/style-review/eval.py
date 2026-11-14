@@ -46,7 +46,7 @@ def run_case_once(case_dir: Path, model: str | None) -> dict:
         sh("git", "add", *RUBRIC_PATHS, cwd=worktree)
         sh(
             "git", "-c", "user.name=style-eval", "-c", "user.email=style-eval@localhost", "-c", "commit.gpgsign=false",
-            "commit", "--allow-empty", "-m", "eval rubric", cwd=worktree,
+            "commit", "--allow-empty", "--no-verify", "-m", "eval rubric", cwd=worktree,
         )
         shutil.copytree(case_dir / "files", worktree, dirs_exist_ok=True)
         sh("git", "add", "--intent-to-add", ".", cwd=worktree)
