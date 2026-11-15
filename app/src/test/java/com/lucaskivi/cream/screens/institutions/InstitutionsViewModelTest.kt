@@ -1,13 +1,10 @@
 package com.lucaskivi.cream.screens.institutions
 
 import com.lucaskivi.cream.core.NetworkResult
-import com.lucaskivi.cream.core.institution.model.FinancialAccount
-import com.lucaskivi.cream.core.institution.model.FinancialAccountType
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.link.model.InstitutionLinkResult
-import com.lucaskivi.cream.ui.format.CurrencyFormatter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -37,11 +34,12 @@ import org.junit.jupiter.api.Test
 class InstitutionsViewModelTest {
 
     private val institutionRepository: InstitutionRepository = mockk()
-    private val currencyFormatter: CurrencyFormatter = mockk()
+    private val uiTransformer: InstitutionsUiTransformer = mockk()
     private val chase = institutionWithAccounts("item1", "Chase")
     private val amex = institutionWithAccounts("item2", "Amex")
-    private val chaseItem = InstitutionItem(chase.institution, emptyList())
-    private val amexItem = InstitutionItem(amex.institution, emptyList())
+    private val chaseItem = institutionItemData(chase)
+    private val amexItem = institutionItemData(amex)
+    private val confirmDisconnectChase = InstitutionsDialog.ConfirmDisconnect("Chase", chase.institution)
 
     @BeforeEach
     fun setUp() {
@@ -50,7 +48,7 @@ class InstitutionsViewModelTest {
 
     @AfterEach
     fun tearDown() {
-        confirmVerified(institutionRepository, currencyFormatter)
+        confirmVerified(institutionRepository, uiTransformer)
         Dispatchers.resetMain()
     }
 
@@ -58,9 +56,10 @@ class InstitutionsViewModelTest {
     inner class Init {
 
         @Test
-        fun `lists every linked institution`() {
+        fun `lists every linked institution as transformed`() {
             // Setup
             stubInstitutions(listOf(chase, amex))
+            stubInstitutionItems()
             val expected = InstitutionsContent.Loaded(listOf(chaseItem, amexItem))
 
             // Test
@@ -68,7 +67,11 @@ class InstitutionsViewModelTest {
 
             // Verify
             assertEquals(expected, viewModel.uiState.value.content)
-            verify { institutionRepository.observeInstitutionsWithAccounts() }
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toInstitutionItemData(chase)
+                uiTransformer.toInstitutionItemData(amex)
+            }
         }
 
         @Test
@@ -89,6 +92,7 @@ class InstitutionsViewModelTest {
             // Setup
             val institutions = MutableStateFlow(listOf(chase))
             every { institutionRepository.observeInstitutionsWithAccounts() } returns institutions
+            stubInstitutionItems()
             val viewModel = createViewModel()
             val expected = InstitutionsContent.Loaded(listOf(chaseItem, amexItem))
 
@@ -97,43 +101,10 @@ class InstitutionsViewModelTest {
 
             // Verify
             assertEquals(expected, viewModel.uiState.value.content)
-            verify { institutionRepository.observeInstitutionsWithAccounts() }
-        }
-
-        @Test
-        fun `shows each account's details and formatted balance`() {
-            // Setup
-            val account = FinancialAccount(
-                accountId = "acc1",
-                itemId = "item1",
-                displayName = "Total Checking",
-                mask = "1234",
-                type = FinancialAccountType.DEPOSITORY,
-                subtype = "checking",
-                balanceCurrent = 1234.5,
-                balanceAvailable = null,
-                isoCurrencyCode = "USD",
-            )
-            stubInstitutions(listOf(chase.copy(accounts = listOf(account))))
-            every { currencyFormatter.format(1234.5, "USD", any()) } returns "$1,234.50"
-            val expectedAccount = AccountItem(
-                accountId = "acc1",
-                name = "Total Checking",
-                details = "•••• 1234 · Depository",
-                balance = "$1,234.50",
-            )
-            val expected = InstitutionsContent.Loaded(
-                listOf(chaseItem.copy(accounts = listOf(expectedAccount))),
-            )
-
-            // Test
-            val viewModel = createViewModel()
-
-            // Verify
-            assertEquals(expected, viewModel.uiState.value.content)
             verify {
                 institutionRepository.observeInstitutionsWithAccounts()
-                currencyFormatter.format(1234.5, "USD", any())
+                uiTransformer.toInstitutionItemData(chase)
+                uiTransformer.toInstitutionItemData(amex)
             }
         }
     }
@@ -288,6 +259,7 @@ class InstitutionsViewModelTest {
         fun `refreshes then syncs every institution`() {
             // Setup
             stubInstitutions(listOf(chase, amex))
+            stubInstitutionItems()
             val refreshGate = CompletableDeferred<NetworkResult<Unit>>()
             coEvery { institutionRepository.refreshInstitutions() } coAnswers { refreshGate.await() }
             val syncedItemIds = mutableListOf<String>()
@@ -310,6 +282,8 @@ class InstitutionsViewModelTest {
             assertNull(viewModel.uiState.value.dialog)
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toInstitutionItemData(chase)
+                uiTransformer.toInstitutionItemData(amex)
                 institutionRepository.refreshInstitutions()
                 institutionRepository.observeInstitutionsWithAccounts()
                 institutionRepository.syncTransactions("item1")
@@ -321,6 +295,7 @@ class InstitutionsViewModelTest {
         fun `stops with an error dialog and doesn't sync when the refresh fails`() {
             // Setup
             stubInstitutions(listOf(chase))
+            stubInstitutionItems()
             coEvery {
                 institutionRepository.refreshInstitutions()
             } returns NetworkResult.Failure(RuntimeException("network"))
@@ -336,6 +311,7 @@ class InstitutionsViewModelTest {
             coVerify(exactly = 0) { institutionRepository.syncTransactions(any()) }
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toInstitutionItemData(chase)
                 institutionRepository.refreshInstitutions()
             }
         }
@@ -344,6 +320,7 @@ class InstitutionsViewModelTest {
         fun `shows one error dialog and still syncs the others when a sync fails`() {
             // Setup
             stubInstitutions(listOf(chase, amex))
+            stubInstitutionItems()
             coEvery { institutionRepository.refreshInstitutions() } returns NetworkResult.Success(Unit)
             coEvery {
                 institutionRepository.syncTransactions("item1")
@@ -360,6 +337,8 @@ class InstitutionsViewModelTest {
             assertEquals(expected, viewModel.uiState.value.dialog)
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toInstitutionItemData(chase)
+                uiTransformer.toInstitutionItemData(amex)
                 institutionRepository.refreshInstitutions()
                 institutionRepository.observeInstitutionsWithAccounts()
                 institutionRepository.syncTransactions("item1")
@@ -375,15 +354,18 @@ class InstitutionsViewModelTest {
         fun `asks to confirm disconnecting the institution`() {
             // Setup
             stubInstitutions(emptyList())
+            stubConfirmDisconnect()
             val viewModel = createViewModel()
-            val expected = InstitutionsDialog.ConfirmDisconnect(chase.institution)
 
             // Test
             viewModel.requestDisconnect(chase.institution)
 
             // Verify
-            assertEquals(expected, viewModel.uiState.value.dialog)
-            verify { institutionRepository.observeInstitutionsWithAccounts() }
+            assertEquals(confirmDisconnectChase, viewModel.uiState.value.dialog)
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toConfirmDisconnect(chase.institution)
+            }
         }
     }
 
@@ -395,6 +377,7 @@ class InstitutionsViewModelTest {
             // Setup
             stubInstitutions(emptyList())
             coEvery { institutionRepository.disconnectInstitution("item1") } returns NetworkResult.Success(Unit)
+            stubConfirmDisconnect()
             val viewModel = createViewModel()
             viewModel.requestDisconnect(chase.institution)
 
@@ -405,6 +388,7 @@ class InstitutionsViewModelTest {
             assertNull(viewModel.uiState.value.dialog)
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toConfirmDisconnect(chase.institution)
                 institutionRepository.disconnectInstitution("item1")
             }
         }
@@ -416,9 +400,11 @@ class InstitutionsViewModelTest {
             coEvery {
                 institutionRepository.disconnectInstitution("item1")
             } returns NetworkResult.Failure(RuntimeException("network"))
+            stubConfirmDisconnect()
+            every { uiTransformer.toDisconnectFailedMessage(chase.institution) } returns "Couldn't disconnect Chase."
             val viewModel = createViewModel()
             viewModel.requestDisconnect(chase.institution)
-            val expected = InstitutionsDialog.Error("Couldn't disconnect Chase. Please try again.")
+            val expected = InstitutionsDialog.Error("Couldn't disconnect Chase.")
 
             // Test
             viewModel.confirmDisconnect()
@@ -427,7 +413,9 @@ class InstitutionsViewModelTest {
             assertEquals(expected, viewModel.uiState.value.dialog)
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toConfirmDisconnect(chase.institution)
                 institutionRepository.disconnectInstitution("item1")
+                uiTransformer.toDisconnectFailedMessage(chase.institution)
             }
         }
 
@@ -454,6 +442,7 @@ class InstitutionsViewModelTest {
         fun `closes the disconnect confirmation without disconnecting`() {
             // Setup
             stubInstitutions(emptyList())
+            stubConfirmDisconnect()
             val viewModel = createViewModel()
             viewModel.requestDisconnect(chase.institution)
 
@@ -463,7 +452,10 @@ class InstitutionsViewModelTest {
             // Verify
             assertNull(viewModel.uiState.value.dialog)
             coVerify(exactly = 0) { institutionRepository.disconnectInstitution(any()) }
-            verify { institutionRepository.observeInstitutionsWithAccounts() }
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                uiTransformer.toConfirmDisconnect(chase.institution)
+            }
         }
 
         @Test
@@ -488,10 +480,29 @@ class InstitutionsViewModelTest {
         every { institutionRepository.observeInstitutionsWithAccounts() } returns flowOf(institutions)
     }
 
+    private fun stubInstitutionItems() {
+        every { uiTransformer.toInstitutionItemData(chase) } returns chaseItem
+        every { uiTransformer.toInstitutionItemData(amex) } returns amexItem
+    }
+
+    private fun stubConfirmDisconnect() {
+        every { uiTransformer.toConfirmDisconnect(chase.institution) } returns confirmDisconnectChase
+    }
+
     private fun createViewModel() =
         InstitutionsViewModel(
             institutionRepository = institutionRepository,
-            currencyFormatter = currencyFormatter,
+            uiTransformer = uiTransformer,
+        )
+
+    private fun institutionItemData(
+        institutionWithAccounts: LinkedInstitutionWithAccounts,
+    ): InstitutionItemData =
+        InstitutionItemData(
+            itemId = institutionWithAccounts.institution.itemId,
+            name = institutionWithAccounts.institution.institutionName,
+            accounts = emptyList(),
+            institution = institutionWithAccounts.institution,
         )
 
     private fun institutionWithAccounts(
