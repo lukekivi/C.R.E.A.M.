@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.lucaskivi.cream.data.di.AppContainer
-import com.lucaskivi.cream.data.model.User
 import com.lucaskivi.cream.data.repository.auth.AuthRepository
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,16 +20,18 @@ import kotlinx.coroutines.launch
  *
  * @param authRepository Source of the signed-in user and the sign-out action.
  * @param institutionRepository Owner of the cached institution data cleared on sign-out.
+ * @param uiTransformer Converts the signed-in user into what the screen shows.
  */
 class HomeViewModel(
     private val authRepository: AuthRepository,
     private val institutionRepository: InstitutionRepository,
+    private val uiTransformer: HomeUiTransformer,
 ) : ViewModel() {
 
     /**
      * Mutable backing flow for [uiState].
      */
-    private val mutableUiState = MutableStateFlow(HomeUiState())
+    private val mutableUiState = MutableStateFlow(HomeUiState(uiTransformer.toProfileSectionData(null)))
 
     /**
      * Observable UI state of the home screen.
@@ -40,9 +41,10 @@ class HomeViewModel(
     init {
         viewModelScope.launch {
             authRepository.authStateFlow.collect { user ->
+                val profile = uiTransformer.toProfileSectionData(user)
                 mutableUiState.update {
                     it.copy(
-                        currentUser = user,
+                        profile = profile,
                     )
                 }
             }
@@ -77,6 +79,7 @@ class HomeViewModel(
                     HomeViewModel(
                         authRepository = appContainer.authRepository,
                         institutionRepository = appContainer.institutionRepository,
+                        uiTransformer = HomeUiTransformer(),
                     ) as T
             }
     }
@@ -85,8 +88,8 @@ class HomeViewModel(
 /**
  * UI state for the home screen.
  *
- * @property currentUser The signed-in user, or null while auth state is initializing or after sign-out.
+ * @property profile What the profile section shows.
  */
 data class HomeUiState(
-    val currentUser: User? = null,
+    val profile: ProfileSectionData,
 )

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.lucaskivi.cream.core.NetworkResult
-import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
 import com.lucaskivi.cream.core.onFailure
@@ -35,11 +34,11 @@ import kotlinx.coroutines.launch
  * refresh all of them, and disconnect one.
  *
  * @param institutionRepository Source of linked institutions and the actions on them.
- * @param currencyFormatter Formats account balances for display.
+ * @param uiTransformer Converts institutions into what the screen shows.
  */
 class InstitutionsViewModel(
     private val institutionRepository: InstitutionRepository,
-    private val currencyFormatter: CurrencyFormatter,
+    private val uiTransformer: InstitutionsUiTransformer,
 ) : ViewModel() {
 
     /**
@@ -138,7 +137,7 @@ class InstitutionsViewModel(
     fun requestDisconnect(
         institution: LinkedInstitution,
     ) {
-        val dialog = InstitutionsDialog.ConfirmDisconnect(institution)
+        val dialog = uiTransformer.toConfirmDisconnect(institution)
         mutableUiState.update {
             it.copy(
                 dialog = dialog,
@@ -183,7 +182,7 @@ class InstitutionsViewModel(
         val content = if (institutions.isEmpty()) {
             InstitutionsContent.Empty
         } else {
-            InstitutionsContent.Loaded(institutions.map(::toInstitutionItem))
+            InstitutionsContent.Loaded(institutions.map(uiTransformer::toInstitutionItemData))
         }
         mutableUiState.update {
             it.copy(
@@ -228,7 +227,7 @@ class InstitutionsViewModel(
     private fun handleDisconnectFailure(
         institution: LinkedInstitution,
     ) {
-        val message = "Couldn't disconnect ${institution.institutionName}. Please try again."
+        val message = uiTransformer.toDisconnectFailedMessage(institution)
         val dialog = InstitutionsDialog.Error(message)
         mutableUiState.update {
             it.copy(
@@ -256,48 +255,6 @@ class InstitutionsViewModel(
                 .onSuccess { stopLinking(errorMessage = null) }
                 .onFailure { _ -> stopLinking(LINK_FAILED_MESSAGE) }
         }
-    }
-
-    /**
-     * Returns [institutionWithAccounts] as it's shown on screen.
-     *
-     * @param institutionWithAccounts A linked institution with its accounts.
-     */
-    private fun toInstitutionItem(
-        institutionWithAccounts: LinkedInstitutionWithAccounts,
-    ): InstitutionItem {
-        val accounts = institutionWithAccounts.accounts.map(::toAccountItem)
-        return InstitutionItem(
-            institution = institutionWithAccounts.institution,
-            accounts = accounts,
-        )
-    }
-
-    /**
-     * Returns [account] as it's shown on screen.
-     *
-     * @param account The account to show.
-     */
-    private fun toAccountItem(
-        account: FinancialAccount,
-    ): AccountItem {
-        val type = account.type.name
-            .lowercase()
-            .replaceFirstChar { it.titlecase() }
-        val details = listOfNotNull(
-            account.mask?.let { "•••• $it" },
-            type,
-        ).joinToString(" · ")
-        val balance = currencyFormatter.format(
-            account.balanceCurrent,
-            account.isoCurrencyCode,
-        )
-        return AccountItem(
-            accountId = account.accountId,
-            name = account.displayName,
-            details = details,
-            balance = balance,
-        )
     }
 
     /**
@@ -360,7 +317,7 @@ class InstitutionsViewModel(
                 ): T =
                     InstitutionsViewModel(
                         institutionRepository = appContainer.institutionRepository,
-                        currencyFormatter = CurrencyFormatter(),
+                        uiTransformer = InstitutionsUiTransformer(CurrencyFormatter()),
                     ) as T
             }
     }
@@ -403,35 +360,9 @@ sealed interface InstitutionsContent {
      * @property institutions Every linked institution with its accounts.
      */
     data class Loaded(
-        val institutions: List<InstitutionItem>,
+        val institutions: List<InstitutionItemData>,
     ) : InstitutionsContent
 }
-
-/**
- * A linked institution as the Institutions screen shows it.
- *
- * @property institution The linked institution.
- * @property accounts The institution's accounts.
- */
-data class InstitutionItem(
-    val institution: LinkedInstitution,
-    val accounts: List<AccountItem>,
-)
-
-/**
- * An account as the Institutions screen shows it.
- *
- * @property accountId Stable identifier of the account.
- * @property name Account name (e.g. "Total Checking").
- * @property details Masked number and type (e.g. "•••• 1234 · Depository").
- * @property balance Current balance in the account's currency, or "—" if unknown.
- */
-data class AccountItem(
-    val accountId: String,
-    val name: String,
-    val details: String,
-    val balance: String,
-)
 
 /**
  * Dialog shown over the Institutions screen.
@@ -439,11 +370,13 @@ data class AccountItem(
 sealed interface InstitutionsDialog {
 
     /**
-     * Asks the user to confirm disconnecting [institution].
+     * Asks the user to confirm disconnecting an institution.
      *
-     * @property institution The institution to disconnect once confirmed.
+     * @property institutionName Name of the institution to disconnect.
+     * @property institution Payload for the disconnect once confirmed; never read for display.
      */
     data class ConfirmDisconnect(
+        val institutionName: String,
         val institution: LinkedInstitution,
     ) : InstitutionsDialog
 
