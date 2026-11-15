@@ -5,6 +5,7 @@ import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.FinancialAccountType
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
+import com.lucaskivi.cream.core.institution.model.TransactionSyncState
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.link.model.InstitutionLinkResult
 import com.lucaskivi.cream.ui.format.CurrencyFormatter
@@ -40,8 +41,8 @@ class InstitutionsViewModelTest {
     private val currencyFormatter: CurrencyFormatter = mockk()
     private val chase = institutionWithAccounts("item1", "Chase")
     private val amex = institutionWithAccounts("item2", "Amex")
-    private val chaseItem = InstitutionItem(chase.institution, emptyList())
-    private val amexItem = InstitutionItem(amex.institution, emptyList())
+    private val chaseItem = InstitutionItem(chase.institution, emptyList(), InstitutionSyncStatus.Idle)
+    private val amexItem = InstitutionItem(amex.institution, emptyList(), InstitutionSyncStatus.Idle)
 
     @BeforeEach
     fun setUp() {
@@ -68,7 +69,11 @@ class InstitutionsViewModelTest {
 
             // Verify
             assertEquals(expected, viewModel.uiState.value.content)
-            verify { institutionRepository.observeInstitutionsWithAccounts() }
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
+                institutionRepository.observeTransactionSyncState("item2")
+            }
         }
 
         @Test
@@ -89,6 +94,7 @@ class InstitutionsViewModelTest {
             // Setup
             val institutions = MutableStateFlow(listOf(chase))
             every { institutionRepository.observeInstitutionsWithAccounts() } returns institutions
+            stubSyncStates()
             val viewModel = createViewModel()
             val expected = InstitutionsContent.Loaded(listOf(chaseItem, amexItem))
 
@@ -97,7 +103,65 @@ class InstitutionsViewModelTest {
 
             // Verify
             assertEquals(expected, viewModel.uiState.value.content)
-            verify { institutionRepository.observeInstitutionsWithAccounts() }
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
+                institutionRepository.observeTransactionSyncState("item2")
+            }
+        }
+
+        @Test
+        fun `shows each institution's sync status`() {
+            // Setup
+            stubInstitutions(listOf(chase, amex))
+            every {
+                institutionRepository.observeTransactionSyncState("item1")
+            } returns flowOf(TransactionSyncState.Syncing)
+            every {
+                institutionRepository.observeTransactionSyncState("item2")
+            } returns flowOf(TransactionSyncState.Failed(RuntimeException("sync error")))
+            val expected = InstitutionsContent.Loaded(
+                listOf(
+                    chaseItem.copy(
+                        syncStatus = InstitutionSyncStatus.Syncing,
+                    ),
+                    amexItem.copy(
+                        syncStatus = InstitutionSyncStatus.Failed,
+                    ),
+                ),
+            )
+
+            // Test
+            val viewModel = createViewModel()
+
+            // Verify
+            assertEquals(expected, viewModel.uiState.value.content)
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
+                institutionRepository.observeTransactionSyncState("item2")
+            }
+        }
+
+        @Test
+        fun `updates an institution's sync status as it changes`() {
+            // Setup
+            val chaseSyncState = MutableStateFlow<TransactionSyncState>(TransactionSyncState.Syncing)
+            stubInstitutions(listOf(chase, amex))
+            every { institutionRepository.observeTransactionSyncState("item1") } returns chaseSyncState
+            val viewModel = createViewModel()
+            val expected = InstitutionsContent.Loaded(listOf(chaseItem, amexItem))
+
+            // Test
+            chaseSyncState.value = TransactionSyncState.Idle
+
+            // Verify
+            assertEquals(expected, viewModel.uiState.value.content)
+            verify {
+                institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
+                institutionRepository.observeTransactionSyncState("item2")
+            }
         }
 
         @Test
@@ -133,6 +197,7 @@ class InstitutionsViewModelTest {
             assertEquals(expected, viewModel.uiState.value.content)
             verify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
                 currencyFormatter.format(1234.5, "USD", any())
             }
         }
@@ -310,6 +375,8 @@ class InstitutionsViewModelTest {
             assertNull(viewModel.uiState.value.dialog)
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
+                institutionRepository.observeTransactionSyncState("item2")
                 institutionRepository.refreshInstitutions()
                 institutionRepository.observeInstitutionsWithAccounts()
                 institutionRepository.syncTransactions("item1")
@@ -336,6 +403,7 @@ class InstitutionsViewModelTest {
             coVerify(exactly = 0) { institutionRepository.syncTransactions(any()) }
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
                 institutionRepository.refreshInstitutions()
             }
         }
@@ -360,6 +428,8 @@ class InstitutionsViewModelTest {
             assertEquals(expected, viewModel.uiState.value.dialog)
             coVerify {
                 institutionRepository.observeInstitutionsWithAccounts()
+                institutionRepository.observeTransactionSyncState("item1")
+                institutionRepository.observeTransactionSyncState("item2")
                 institutionRepository.refreshInstitutions()
                 institutionRepository.observeInstitutionsWithAccounts()
                 institutionRepository.syncTransactions("item1")
@@ -486,6 +556,13 @@ class InstitutionsViewModelTest {
         institutions: List<LinkedInstitutionWithAccounts>,
     ) {
         every { institutionRepository.observeInstitutionsWithAccounts() } returns flowOf(institutions)
+        stubSyncStates()
+    }
+
+    private fun stubSyncStates() {
+        every {
+            institutionRepository.observeTransactionSyncState(any())
+        } returns flowOf(TransactionSyncState.Idle)
     }
 
     private fun createViewModel() =

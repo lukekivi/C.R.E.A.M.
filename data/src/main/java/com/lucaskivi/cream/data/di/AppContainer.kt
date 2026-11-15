@@ -8,6 +8,9 @@ import com.lucaskivi.cream.data.repository.institution.InstitutionRepositoryImpl
 import com.lucaskivi.cream.auth.authDataSource
 import com.lucaskivi.cream.institution.institutionLocalDataSource
 import com.lucaskivi.cream.institution.institutionRemoteDataSource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * Manual dependency injection container for the app.
@@ -21,12 +24,19 @@ class AppContainer(
     context: Context,
 ) {
     /**
+     * Scope for work that must outlive any one screen, such as background syncs. Lives as long as
+     * the app process. A supervisor, so one failed job doesn't cancel the others.
+     */
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /**
      * Singleton [InstitutionRepository] for the app.
      */
     val institutionRepository: InstitutionRepository =
         InstitutionRepositoryImpl(
-            institutionRemoteDataSource(),
-            institutionLocalDataSource(context),
+            remoteDataSource = institutionRemoteDataSource(),
+            localDataSource = institutionLocalDataSource(context),
+            externalScope = applicationScope,
         )
 
     /**

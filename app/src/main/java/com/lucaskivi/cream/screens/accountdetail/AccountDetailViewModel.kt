@@ -6,18 +6,25 @@ import androidx.lifecycle.viewModelScope
 import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.Transaction
+import com.lucaskivi.cream.core.institution.model.TransactionSyncState
 import com.lucaskivi.cream.data.di.AppContainer
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.ui.format.CurrencyFormatter
 import com.lucaskivi.cream.ui.format.DateFormatter
 import com.lucaskivi.cream.ui.format.formattedDetails
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,14 +33,16 @@ import kotlin.math.abs
 /**
  * ViewModel for the Account detail screen.
  *
- * Shows one account's balance and its cached transactions grouped by date, and refreshes the
- * balance and transactions on demand. Tells the screen to close if the account stops existing.
+ * Shows one account's balance and its cached transactions grouped by date, reflects its
+ * institution's transaction sync state, and refreshes the balance and transactions on demand.
+ * Tells the screen to close if the account stops existing.
  *
  * @param accountId The account to show.
  * @param institutionRepository Source of the account, its transactions, and their refresh.
  * @param currencyFormatter Formats the balance and transaction amounts for display.
  * @param dateFormatter Formats transaction dates for display.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class AccountDetailViewModel(
     private val accountId: String,
     private val institutionRepository: InstitutionRepository,
@@ -67,10 +76,27 @@ class AccountDetailViewModel(
      */
     private var itemId: String? = null
 
+    /**
+     * Whether the current sync failure is already accounted for, so the inline error stays
+     * hidden. Pull to refresh sets it: starting one dismisses the inline error, and a failure
+     * of its own sync is reported by its error dialog instead. A refresh that succeeds, or a
+     * sync that starts outside a refresh, clears it, so a later background failure shows inline
+     * again.
+     */
+    private val isSyncFailureAcknowledged = MutableStateFlow(false)
+
     init {
+        val accountUpdates = institutionRepository.observeAccount(accountId)
+        val syncStateUpdates = accountUpdates
+            .map { account -> account?.itemId }
+            .distinctUntilChanged()
+            .flatMapLatest(::observeSyncState)
+            .onEach(::handleSyncState)
         combine(
-            institutionRepository.observeAccount(accountId),
+            accountUpdates,
             institutionRepository.observeTransactions(accountId),
+            syncStateUpdates,
+            isSyncFailureAcknowledged,
             ::handleAccount,
         ).launchIn(viewModelScope)
     }
@@ -88,10 +114,16 @@ class AccountDetailViewModel(
                     isRefreshing = true,
                 )
             }
+            isSyncFailureAcknowledged.value = true
             viewModelScope.launch {
                 val errorMessage = when (institutionRepository.refreshInstitutions()) {
                     is NetworkResult.Success -> syncTransactions(itemId)
                     is NetworkResult.Failure -> REFRESH_FAILED_MESSAGE
+                }
+                // A clean refresh leaves nothing to acknowledge, so the next background failure
+                // shows inline even if its Syncing emission is never seen.
+                if (errorMessage == null) {
+                    isSyncFailureAcknowledged.value = false
                 }
                 mutableUiState.update {
                     val shownErrorMessage = errorMessage ?: it.errorMessage
@@ -115,14 +147,48 @@ class AccountDetailViewModel(
         }
 
     /**
+     * Returns the transaction sync state of the institution identified by [itemId], or a lone
+     * [TransactionSyncState.Idle] when there is none.
+     *
+     * @param itemId Identifier of the account's institution, or null if the account is gone.
+     */
+    private fun observeSyncState(
+        itemId: String?,
+    ): Flow<TransactionSyncState> =
+        if (itemId == null) {
+            flowOf(TransactionSyncState.Idle)
+        } else {
+            institutionRepository.observeTransactionSyncState(itemId)
+        }
+
+    /**
+     * Clears the sync failure acknowledgement when [syncState] shows a sync running or done
+     * outside a refresh. A refresh's sync may join one that was already running, so its states
+     * can't be told apart from a background sync's.
+     *
+     * @param syncState The institution's latest transaction sync state.
+     */
+    private fun handleSyncState(
+        syncState: TransactionSyncState,
+    ) {
+        if (syncState !is TransactionSyncState.Failed && !uiState.value.isRefreshing) {
+            isSyncFailureAcknowledged.value = false
+        }
+    }
+
+    /**
      * Shows [account] and its [transactions], or tells the screen to close if [account] is null.
      *
      * @param account The account, or null if it no longer exists.
      * @param transactions The account's transactions, newest first.
+     * @param syncState The transaction sync state of the account's institution.
+     * @param isSyncFailureAcknowledged Whether a sync failure is already accounted for.
      */
     private suspend fun handleAccount(
         account: FinancialAccount?,
         transactions: List<Transaction>,
+        syncState: TransactionSyncState,
+        isSyncFailureAcknowledged: Boolean,
     ) {
         itemId = account?.itemId
         if (account == null) {
@@ -132,9 +198,18 @@ class AccountDetailViewModel(
                 transactions,
                 account.isoCurrencyCode,
             )
+            val notice = when {
+                syncState is TransactionSyncState.Syncing -> TransactionsNotice.Syncing
+                syncState is TransactionSyncState.Failed && !isSyncFailureAcknowledged -> {
+                    TransactionsNotice.SyncFailed
+                }
+                transactionGroups.isEmpty() -> TransactionsNotice.Empty
+                else -> null
+            }
             val content = AccountDetailContent.Loaded(
                 account = toAccountSummary(account),
                 transactionGroups = transactionGroups,
+                notice = notice,
             )
             mutableUiState.update {
                 it.copy(
@@ -298,11 +373,34 @@ sealed interface AccountDetailContent {
      * @property account The account's balance, name and details.
      * @property transactionGroups Every cached transaction of the account, grouped by date,
      *   newest first. Empty if the account has none.
+     * @property notice Shown above the transactions, or null if none.
      */
     data class Loaded(
         val account: AccountSummary,
         val transactionGroups: List<TransactionDateGroup>,
+        val notice: TransactionsNotice?,
     ) : AccountDetailContent
+}
+
+/**
+ * A line shown above the account's transactions.
+ */
+enum class TransactionsNotice {
+
+    /**
+     * The account's transactions are syncing.
+     */
+    Syncing,
+
+    /**
+     * A background sync of the account's transactions failed.
+     */
+    SyncFailed,
+
+    /**
+     * The account has no transactions, and none are syncing.
+     */
+    Empty,
 }
 
 /**

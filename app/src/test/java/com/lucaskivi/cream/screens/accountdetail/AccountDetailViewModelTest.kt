@@ -4,6 +4,7 @@ import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.FinancialAccountType
 import com.lucaskivi.cream.core.institution.model.Transaction
+import com.lucaskivi.cream.core.institution.model.TransactionSyncState
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.ui.format.CurrencyFormatter
 import com.lucaskivi.cream.ui.format.DateFormatter
@@ -57,7 +58,9 @@ class AccountDetailViewModelTest {
     )
     private val accountFlow = MutableStateFlow<FinancialAccount?>(account)
     private val transactionsFlow = MutableStateFlow<List<Transaction>>(emptyList())
-    private val loadedEmpty = AccountDetailContent.Loaded(accountSummary, emptyList())
+    private val syncStateFlow = MutableStateFlow<TransactionSyncState>(TransactionSyncState.Idle)
+    private val syncFailure = TransactionSyncState.Failed(RuntimeException("sync error"))
+    private val loadedEmpty = AccountDetailContent.Loaded(accountSummary, emptyList(), TransactionsNotice.Empty)
 
     @BeforeEach
     fun setUp() {
@@ -104,7 +107,7 @@ class AccountDetailViewModelTest {
                     transactions = listOf(transactionItem("t3", amount = "-$3.00", isInflow = false)),
                 ),
             )
-            val expected = AccountDetailContent.Loaded(accountSummary, expectedGroups)
+            val expected = AccountDetailContent.Loaded(accountSummary, expectedGroups, notice = null)
 
             // Test
             val viewModel = createViewModel()
@@ -114,6 +117,7 @@ class AccountDetailViewModelTest {
             verify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 currencyFormatter.format(12.5, "USD", any())
                 currencyFormatter.format(20.0, "USD", any())
@@ -150,6 +154,7 @@ class AccountDetailViewModelTest {
             verify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 currencyFormatter.format(12.5, "USD", any())
                 dateFormatter.format(date, any())
@@ -184,6 +189,7 @@ class AccountDetailViewModelTest {
             verify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
             }
         }
@@ -204,17 +210,115 @@ class AccountDetailViewModelTest {
                     transactions = listOf(transactionItem("t1", amount = "-$12.50", isInflow = false)),
                 ),
             )
-            val expected = AccountDetailContent.Loaded(accountSummary, expectedGroups)
+            val expected = AccountDetailContent.Loaded(accountSummary, expectedGroups, notice = null)
 
             // Test
             transactionsFlow.value = listOf(arrived)
 
             // Verify
             assertEquals(expected, viewModel.uiState.value.content)
-            verify(exactly = 2) { currencyFormatter.format(100.0, "USD", any()) }
             verify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+                currencyFormatter.format(12.5, "USD", any())
+                dateFormatter.format(date, any())
+            }
+        }
+
+        @Test
+        fun `shows syncing while the account's institution syncs`() {
+            // Setup
+            syncStateFlow.value = TransactionSyncState.Syncing
+            stubObservers()
+
+            // Test
+            val viewModel = createViewModel()
+
+            // Verify
+            assertEquals(TransactionsNotice.Syncing, viewModel.notice())
+            verify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+            }
+        }
+
+        @Test
+        fun `shows the inline error after a background sync fails`() {
+            // Setup
+            syncStateFlow.value = syncFailure
+            stubObservers()
+
+            // Test
+            val viewModel = createViewModel()
+
+            // Verify
+            assertEquals(TransactionsNotice.SyncFailed, viewModel.notice())
+            verify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+            }
+        }
+
+        @Test
+        fun `follows the sync state of the account's current institution`() {
+            // Setup
+            val otherSyncState = MutableStateFlow<TransactionSyncState>(TransactionSyncState.Syncing)
+            stubObservers()
+            every { institutionRepository.observeTransactionSyncState(OTHER_ITEM_ID) } returns otherSyncState
+            val viewModel = createViewModel()
+            val movedAccount = account.copy(
+                itemId = OTHER_ITEM_ID,
+            )
+
+            // Test
+            accountFlow.value = movedAccount
+
+            // Verify
+            assertEquals(TransactionsNotice.Syncing, viewModel.notice())
+            verify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                institutionRepository.observeTransactionSyncState(OTHER_ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+            }
+        }
+
+        @Test
+        fun `shows transactions that arrive mid-sync`() {
+            // Setup
+            syncStateFlow.value = TransactionSyncState.Syncing
+            stubObservers()
+            val viewModel = createViewModel()
+            val date = LocalDate.of(2026, 11, 9)
+            val arrived = transaction("t1", date, amount = 12.5)
+            every { dateFormatter.format(date, any()) } returns "Nov 9, 2026"
+            every { currencyFormatter.format(12.5, "USD", any()) } returns "$12.50"
+            val expectedGroups = listOf(
+                TransactionDateGroup(
+                    key = "2026-11-09",
+                    date = "Nov 9, 2026",
+                    transactions = listOf(transactionItem("t1", amount = "-$12.50", isInflow = false)),
+                ),
+            )
+            val expected = AccountDetailContent.Loaded(accountSummary, expectedGroups, TransactionsNotice.Syncing)
+
+            // Test
+            transactionsFlow.value = listOf(arrived)
+
+            // Verify
+            assertEquals(expected, viewModel.uiState.value.content)
+            verify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
                 currencyFormatter.format(12.5, "USD", any())
                 dateFormatter.format(date, any())
             }
@@ -241,6 +345,7 @@ class AccountDetailViewModelTest {
             coVerify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 institutionRepository.refreshInstitutions()
                 institutionRepository.syncTransactions(ITEM_ID)
@@ -268,6 +373,7 @@ class AccountDetailViewModelTest {
             coVerify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 institutionRepository.refreshInstitutions()
                 institutionRepository.syncTransactions(ITEM_ID)
@@ -293,6 +399,7 @@ class AccountDetailViewModelTest {
             coVerify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 institutionRepository.refreshInstitutions()
             }
@@ -319,6 +426,139 @@ class AccountDetailViewModelTest {
             coVerify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+                institutionRepository.refreshInstitutions()
+                institutionRepository.syncTransactions(ITEM_ID)
+            }
+        }
+
+        @Test
+        fun `reports its own sync failure only in the error dialog`() {
+            // Setup
+            val syncResult = CompletableDeferred<NetworkResult<Unit>>()
+            stubObservers()
+            coEvery { institutionRepository.refreshInstitutions() } returns NetworkResult.Success(Unit)
+            coEvery { institutionRepository.syncTransactions(ITEM_ID) } coAnswers { syncResult.await() }
+            val viewModel = createViewModel()
+            val expectedResult = NetworkResult.Failure(syncFailure.cause)
+
+            // Test
+            viewModel.refresh()
+            syncStateFlow.value = TransactionSyncState.Syncing
+            val noticeWhileSyncing = viewModel.notice()
+            syncStateFlow.value = syncFailure
+            syncResult.complete(expectedResult)
+
+            // Verify
+            assertEquals(TransactionsNotice.Syncing, noticeWhileSyncing)
+            assertEquals("Couldn't sync transactions.", viewModel.uiState.value.errorMessage)
+            assertEquals(TransactionsNotice.Empty, viewModel.notice())
+            coVerify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+                institutionRepository.refreshInstitutions()
+                institutionRepository.syncTransactions(ITEM_ID)
+            }
+        }
+
+        @Test
+        fun `reports a failed background sync it joined only in the error dialog`() {
+            // Setup
+            syncStateFlow.value = TransactionSyncState.Syncing
+            stubObservers()
+            coEvery { institutionRepository.refreshInstitutions() } returns NetworkResult.Success(Unit)
+            coEvery { institutionRepository.syncTransactions(ITEM_ID) } coAnswers {
+                syncStateFlow.value = syncFailure
+                NetworkResult.Failure(syncFailure.cause)
+            }
+            val viewModel = createViewModel()
+
+            // Test
+            viewModel.refresh()
+
+            // Verify
+            assertEquals("Couldn't sync transactions.", viewModel.uiState.value.errorMessage)
+            assertEquals(TransactionsNotice.Empty, viewModel.notice())
+            coVerify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+                institutionRepository.refreshInstitutions()
+                institutionRepository.syncTransactions(ITEM_ID)
+            }
+        }
+
+        @Test
+        fun `clears the inline error as soon as it starts`() {
+            // Setup
+            val refreshResult = CompletableDeferred<NetworkResult<Unit>>()
+            syncStateFlow.value = syncFailure
+            stubObservers()
+            coEvery { institutionRepository.refreshInstitutions() } coAnswers { refreshResult.await() }
+            val viewModel = createViewModel()
+
+            // Test
+            viewModel.refresh()
+
+            // Verify
+            assertEquals(TransactionsNotice.Empty, viewModel.notice())
+            coVerify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+                institutionRepository.refreshInstitutions()
+            }
+        }
+
+        @Test
+        fun `shows a later background failure inline again`() {
+            // Setup
+            syncStateFlow.value = syncFailure
+            stubObservers()
+            coEvery {
+                institutionRepository.refreshInstitutions()
+            } returns NetworkResult.Failure(RuntimeException("network"))
+            val viewModel = createViewModel()
+            viewModel.refresh()
+
+            // Test
+            syncStateFlow.value = TransactionSyncState.Syncing
+            syncStateFlow.value = syncFailure
+
+            // Verify
+            assertEquals(TransactionsNotice.SyncFailed, viewModel.notice())
+            coVerify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
+                currencyFormatter.format(100.0, "USD", any())
+                institutionRepository.refreshInstitutions()
+            }
+        }
+
+        @Test
+        fun `shows a background failure right after a successful refresh inline`() {
+            // Setup
+            stubObservers()
+            coEvery { institutionRepository.refreshInstitutions() } returns NetworkResult.Success(Unit)
+            coEvery { institutionRepository.syncTransactions(ITEM_ID) } returns NetworkResult.Success(Unit)
+            val viewModel = createViewModel()
+            viewModel.refresh()
+
+            // Test
+            syncStateFlow.value = syncFailure
+
+            // Verify
+            assertEquals(TransactionsNotice.SyncFailed, viewModel.notice())
+            coVerify {
+                institutionRepository.observeAccount(ACCOUNT_ID)
+                institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 institutionRepository.refreshInstitutions()
                 institutionRepository.syncTransactions(ITEM_ID)
@@ -368,6 +608,7 @@ class AccountDetailViewModelTest {
             coVerify {
                 institutionRepository.observeAccount(ACCOUNT_ID)
                 institutionRepository.observeTransactions(ACCOUNT_ID)
+                institutionRepository.observeTransactionSyncState(ITEM_ID)
                 currencyFormatter.format(100.0, "USD", any())
                 institutionRepository.refreshInstitutions()
             }
@@ -377,6 +618,7 @@ class AccountDetailViewModelTest {
     private fun stubObservers() {
         every { institutionRepository.observeAccount(ACCOUNT_ID) } returns accountFlow
         every { institutionRepository.observeTransactions(ACCOUNT_ID) } returns transactionsFlow
+        every { institutionRepository.observeTransactionSyncState(ITEM_ID) } returns syncStateFlow
     }
 
     private fun verifyObservers() {
@@ -385,6 +627,9 @@ class AccountDetailViewModelTest {
             institutionRepository.observeTransactions(ACCOUNT_ID)
         }
     }
+
+    private fun AccountDetailViewModel.notice(): TransactionsNotice? =
+        (this.uiState.value.content as AccountDetailContent.Loaded).notice
 
     private fun createViewModel() =
         AccountDetailViewModel(
@@ -427,5 +672,6 @@ class AccountDetailViewModelTest {
     private companion object {
         const val ACCOUNT_ID = "acc1"
         const val ITEM_ID = "item1"
+        const val OTHER_ITEM_ID = "item2"
     }
 }

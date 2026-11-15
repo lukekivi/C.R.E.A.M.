@@ -7,6 +7,7 @@ import com.lucaskivi.cream.core.NetworkResult
 import com.lucaskivi.cream.core.institution.model.FinancialAccount
 import com.lucaskivi.cream.core.institution.model.LinkedInstitution
 import com.lucaskivi.cream.core.institution.model.LinkedInstitutionWithAccounts
+import com.lucaskivi.cream.core.institution.model.TransactionSyncState
 import com.lucaskivi.cream.core.onFailure
 import com.lucaskivi.cream.core.onSuccess
 import com.lucaskivi.cream.data.di.AppContainer
@@ -14,6 +15,7 @@ import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.link.model.InstitutionLinkResult
 import com.lucaskivi.cream.ui.format.CurrencyFormatter
 import com.lucaskivi.cream.ui.format.formattedDetails
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -22,8 +24,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -32,12 +39,13 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the Institutions screen.
  *
- * Lists every linked institution with its accounts, and lets the user link a new institution,
- * refresh all of them, and disconnect one.
+ * Lists every linked institution with its accounts and transaction sync state, and lets the
+ * user link a new institution, refresh all of them, and disconnect one.
  *
  * @param institutionRepository Source of linked institutions and the actions on them.
  * @param currencyFormatter Formats account balances for display.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class InstitutionsViewModel(
     private val institutionRepository: InstitutionRepository,
     private val currencyFormatter: CurrencyFormatter,
@@ -64,8 +72,12 @@ class InstitutionsViewModel(
     val events: Flow<InstitutionsEvent> = eventChannel.receiveAsFlow()
 
     init {
+        // The local cache re-emits on every write, including each transaction sync, so equal
+        // lists are dropped before flatMapLatest rebuilds the per-institution sync-state flows.
         institutionRepository
             .observeInstitutionsWithAccounts()
+            .distinctUntilChanged()
+            .flatMapLatest(::observeInstitutionItems)
             .onEach(::handleInstitutions)
             .launchIn(viewModelScope)
     }
@@ -173,18 +185,43 @@ class InstitutionsViewModel(
         }
 
     /**
-     * Shows [institutions] as the screen's content: [InstitutionsContent.Empty] when there are
-     * none, otherwise [InstitutionsContent.Loaded].
+     * Pairs each of [institutions] with its live transaction sync state. Emits an empty list
+     * right away when there are no institutions, since combining no flows would never emit.
      *
      * @param institutions Every linked institution with its accounts.
      */
-    private fun handleInstitutions(
+    private fun observeInstitutionItems(
         institutions: List<LinkedInstitutionWithAccounts>,
+    ): Flow<List<InstitutionItem>> =
+        if (institutions.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            val itemFlows = institutions.map { institutionWithAccounts ->
+                institutionRepository
+                    .observeTransactionSyncState(institutionWithAccounts.institution.itemId)
+                    .map { syncState ->
+                        toInstitutionItem(
+                            institutionWithAccounts,
+                            syncState,
+                        )
+                    }
+            }
+            combine(itemFlows) { items -> items.toList() }
+        }
+
+    /**
+     * Shows [institutions] as the screen's content: [InstitutionsContent.Empty] when there are
+     * none, otherwise [InstitutionsContent.Loaded].
+     *
+     * @param institutions Every linked institution as it's shown on screen.
+     */
+    private fun handleInstitutions(
+        institutions: List<InstitutionItem>,
     ) {
         val content = if (institutions.isEmpty()) {
             InstitutionsContent.Empty
         } else {
-            InstitutionsContent.Loaded(institutions.map(::toInstitutionItem))
+            InstitutionsContent.Loaded(institutions)
         }
         mutableUiState.update {
             it.copy(
@@ -263,14 +300,22 @@ class InstitutionsViewModel(
      * Returns [institutionWithAccounts] as it's shown on screen.
      *
      * @param institutionWithAccounts A linked institution with its accounts.
+     * @param syncState The institution's transaction sync state.
      */
     private fun toInstitutionItem(
         institutionWithAccounts: LinkedInstitutionWithAccounts,
+        syncState: TransactionSyncState,
     ): InstitutionItem {
         val accounts = institutionWithAccounts.accounts.map(::toAccountItem)
+        val syncStatus = when (syncState) {
+            TransactionSyncState.Idle -> InstitutionSyncStatus.Idle
+            TransactionSyncState.Syncing -> InstitutionSyncStatus.Syncing
+            is TransactionSyncState.Failed -> InstitutionSyncStatus.Failed
+        }
         return InstitutionItem(
             institution = institutionWithAccounts.institution,
             accounts = accounts,
+            syncStatus = syncStatus,
         )
     }
 
@@ -406,11 +451,34 @@ sealed interface InstitutionsContent {
  *
  * @property institution The linked institution.
  * @property accounts The institution's accounts.
+ * @property syncStatus Where the institution's transaction sync stands.
  */
 data class InstitutionItem(
     val institution: LinkedInstitution,
     val accounts: List<AccountItem>,
+    val syncStatus: InstitutionSyncStatus,
 )
+
+/**
+ * Where an institution's transaction sync stands, as its header shows it.
+ */
+enum class InstitutionSyncStatus {
+
+    /**
+     * No sync is running and the last one didn't fail. Nothing is shown.
+     */
+    Idle,
+
+    /**
+     * A sync is running.
+     */
+    Syncing,
+
+    /**
+     * The last sync failed.
+     */
+    Failed,
+}
 
 /**
  * An account as the Institutions screen shows it.
