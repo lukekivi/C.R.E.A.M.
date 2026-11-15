@@ -53,7 +53,10 @@ class RegisterViewModel(
                 )
             }
             authRepository
-                .createUserWithEmail(email, password)
+                .createUserWithEmail(
+                    email,
+                    password,
+                )
                 .onSuccess { handleAccountCreated() }
                 .onFailure(::handleFailure)
         }

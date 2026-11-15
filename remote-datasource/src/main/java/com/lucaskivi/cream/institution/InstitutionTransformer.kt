@@ -73,7 +73,12 @@ internal class InstitutionTransformer {
         )
         val accounts = raw["accounts"]
             .asMapList()
-            .map { toFinancialAccount(it, itemId) }
+            .map { account ->
+                toFinancialAccount(
+                    account,
+                    itemId,
+                )
+            }
         return LinkedInstitutionWithAccounts(
             institution = institution,
             accounts = accounts,

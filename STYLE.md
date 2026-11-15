@@ -104,6 +104,34 @@ fun observeTransactions(
 
 This applies to interfaces, abstract declarations, overrides, concrete implementations, and data classes alike. Adding or removing a parameter then touches only its own line. Lambdas and function types are exempt.
 
+### Call arguments
+
+In main code, a call with two or more arguments puts each argument on its own line with a trailing comma. The closing paren goes on its own line. This includes composables, `Modifier` calls, effect keys, and build scripts. Calls with one argument stay on one line. Tests are exempt.
+
+```kotlin
+Icon(
+    imageVector = Icons.Default.Add,
+    contentDescription = "Link an institution",
+)
+authRepository
+    .signInWithEmail(
+        email,
+        password,
+    )
+```
+
+`copy(...)` goes further, in tests too: every argument is named and on its own line, even when there is only one. An argument that takes more than a name or property access (an elvis, a call, a string template) goes in a local `val` first.
+
+```kotlin
+val errorMessage = cause.message ?: SIGN_IN_FAILED_MESSAGE
+mutableUiState.update {
+    it.copy(
+        isLoading = false,
+        errorMessage = errorMessage,
+    )
+}
+```
+
 ### Multi-line arguments
 
 When an argument expression at a call site spans more than one line, extract it into a local `val` first and pass the `val`.
@@ -116,20 +144,6 @@ val request = mapOf(
 val response = functions
     .getHttpsCallable(SYNC_TRANSACTIONS)
     .call(request)
-```
-
-### `copy` calls
-
-Put each `copy(...)` argument on its own line, named, with a trailing comma, even when there is only one. An argument that takes more than a name or property access (an elvis, a call, a string template) goes in a local `val` first.
-
-```kotlin
-val errorMessage = cause.message ?: SIGN_IN_FAILED_MESSAGE
-mutableUiState.update {
-    it.copy(
-        isLoading = false,
-        errorMessage = errorMessage,
-    )
-}
 ```
 
 ## Expression-body functions

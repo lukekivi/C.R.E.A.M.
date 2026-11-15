@@ -25,7 +25,10 @@ fun <T> EventsEffect(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val currentOnEvent by rememberUpdatedState(onEvent)
-    LaunchedEffect(events, lifecycleOwner) {
+    LaunchedEffect(
+        events,
+        lifecycleOwner,
+    ) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
                 events.collect { currentOnEvent(it) }

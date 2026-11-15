@@ -248,7 +248,11 @@ private fun InstitutionHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
+            .padding(
+                start = 16.dp,
+                top = 16.dp,
+                bottom = 4.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -292,7 +296,10 @@ private fun AccountRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(
+                horizontal = 16.dp,
+                vertical = 8.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {

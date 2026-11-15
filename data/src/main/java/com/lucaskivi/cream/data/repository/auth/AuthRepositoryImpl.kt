@@ -28,7 +28,10 @@ class AuthRepositoryImpl(
         password: String,
     ): NetworkResult<User> =
         authDataSource
-            .signInWithEmail(email, password)
+            .signInWithEmail(
+                email,
+                password,
+            )
             .map { it.toDomainUser() }
 
     override suspend fun createUserWithEmail(
@@ -36,7 +39,10 @@ class AuthRepositoryImpl(
         password: String,
     ): NetworkResult<User> =
         authDataSource
-            .createUserWithEmail(email, password)
+            .createUserWithEmail(
+                email,
+                password,
+            )
             .map { it.toDomainUser() }
 
     override suspend fun signInWithGoogle(

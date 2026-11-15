@@ -57,11 +57,17 @@ class InstitutionRepositoryImpl(
     ): NetworkResult<Unit> {
         val cursor = localDataSource.getTransactionCursor(itemId)
         return remoteDataSource
-            .syncTransactions(itemId, cursor)
+            .syncTransactions(
+                itemId,
+                cursor,
+            )
             .map { delta ->
                 localDataSource.upsertTransactions(delta.added + delta.modified)
                 localDataSource.deleteTransactions(delta.removedIds)
-                localDataSource.saveTransactionCursor(itemId, delta.nextCursor)
+                localDataSource.saveTransactionCursor(
+                    itemId,
+                    delta.nextCursor,
+                )
             }
     }
 

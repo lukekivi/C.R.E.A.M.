@@ -39,7 +39,10 @@ class InstitutionLinkLauncher internal constructor(
     ) {
         // Plaid Link sessions are single-use, so each launch creates a new session.
         val configuration = linkTokenConfiguration { token = linkToken }
-        val session = Plaid.createPlaidLinkSession(context, configuration)
+        val session = Plaid.createPlaidLinkSession(
+            context,
+            configuration,
+        )
         activityResultLauncher.launch(session)
     }
 
@@ -66,8 +69,14 @@ fun rememberInstitutionLinkLauncher(
     val activityResultLauncher = rememberLauncherForActivityResult(OpenPlaidLink()) { linkResult ->
         onResult(linkResult.toInstitutionLinkResult())
     }
-    return remember(context, activityResultLauncher) {
-        InstitutionLinkLauncher(context, activityResultLauncher)
+    return remember(
+        context,
+        activityResultLauncher,
+    ) {
+        InstitutionLinkLauncher(
+            context,
+            activityResultLauncher,
+        )
     }
 }
 

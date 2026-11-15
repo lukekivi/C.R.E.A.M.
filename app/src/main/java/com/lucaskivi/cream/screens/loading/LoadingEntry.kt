@@ -14,7 +14,10 @@ import com.lucaskivi.cream.navigation.MainRoute
  */
 fun EntryProviderScope<MainRoute>.loadingEntry() {
     entry<MainRoute.Loading> {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
             CircularProgressIndicator()
         }
     }

@@ -53,7 +53,10 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Create Account", style = MaterialTheme.typography.headlineLarge)
+        Text(
+            "Create Account",
+            style = MaterialTheme.typography.headlineLarge,
+        )
         Spacer(Modifier.height(32.dp))
 
         OutlinedTextField(
@@ -95,7 +98,10 @@ fun RegisterScreen(
                 if (password != confirmPassword) {
                     passwordMismatch = true
                 } else {
-                    viewModel.createAccount(email, password)
+                    viewModel.createAccount(
+                        email,
+                        password,
+                    )
                 }
             },
             enabled = !uiState.isLoading,
@@ -112,7 +118,10 @@ fun RegisterScreen(
 
         uiState.errorMessage?.let { errorMessage ->
             Spacer(Modifier.height(12.dp))
-            Text(errorMessage, color = MaterialTheme.colorScheme.error)
+            Text(
+                errorMessage,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }
