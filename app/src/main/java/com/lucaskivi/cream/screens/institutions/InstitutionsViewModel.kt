@@ -13,6 +13,7 @@ import com.lucaskivi.cream.data.di.AppContainer
 import com.lucaskivi.cream.data.repository.institution.InstitutionRepository
 import com.lucaskivi.cream.link.model.InstitutionLinkResult
 import com.lucaskivi.cream.ui.format.CurrencyFormatter
+import com.lucaskivi.cream.ui.format.formattedDetails
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -281,13 +282,6 @@ class InstitutionsViewModel(
     private fun toAccountItem(
         account: FinancialAccount,
     ): AccountItem {
-        val type = account.type.name
-            .lowercase()
-            .replaceFirstChar { it.titlecase() }
-        val details = listOfNotNull(
-            account.mask?.let { "•••• $it" },
-            type,
-        ).joinToString(" · ")
         val balance = currencyFormatter.format(
             account.balanceCurrent,
             account.isoCurrencyCode,
@@ -295,7 +289,7 @@ class InstitutionsViewModel(
         return AccountItem(
             accountId = account.accountId,
             name = account.displayName,
-            details = details,
+            details = account.formattedDetails(),
             balance = balance,
         )
     }
