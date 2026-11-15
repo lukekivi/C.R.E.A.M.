@@ -11,11 +11,19 @@ android {
     }
     defaultConfig {
         minSdk = 30
-        buildConfigField("boolean", "USE_FUNCTIONS_EMULATOR", "false")
+        buildConfigField(
+            "boolean",
+            "USE_FUNCTIONS_EMULATOR",
+            "false",
+        )
     }
     buildTypes {
         debug {
-            buildConfigField("boolean", "USE_FUNCTIONS_EMULATOR", "true")
+            buildConfigField(
+                "boolean",
+                "USE_FUNCTIONS_EMULATOR",
+                "true",
+            )
         }
     }
     buildFeatures {

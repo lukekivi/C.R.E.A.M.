@@ -284,8 +284,14 @@ class InstitutionsViewModel(
         val type = account.type.name
             .lowercase()
             .replaceFirstChar { it.titlecase() }
-        val details = listOfNotNull(account.mask?.let { "•••• $it" }, type).joinToString(" · ")
-        val balance = currencyFormatter.format(account.balanceCurrent, account.isoCurrencyCode)
+        val details = listOfNotNull(
+            account.mask?.let { "•••• $it" },
+            type,
+        ).joinToString(" · ")
+        val balance = currencyFormatter.format(
+            account.balanceCurrent,
+            account.isoCurrencyCode,
+        )
         return AccountItem(
             accountId = account.accountId,
             name = account.displayName,

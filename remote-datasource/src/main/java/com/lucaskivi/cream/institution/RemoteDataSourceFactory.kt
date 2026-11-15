@@ -24,7 +24,10 @@ private fun functions(): FirebaseFunctions =
         .getInstance()
         .apply {
             if (BuildConfig.USE_FUNCTIONS_EMULATOR) {
-                useEmulator(FUNCTIONS_EMULATOR_HOST, FUNCTIONS_EMULATOR_PORT)
+                useEmulator(
+                    FUNCTIONS_EMULATOR_HOST,
+                    FUNCTIONS_EMULATOR_PORT,
+                )
             }
         }
 

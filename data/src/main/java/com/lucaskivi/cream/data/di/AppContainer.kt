@@ -24,7 +24,10 @@ class AppContainer(
      * Singleton [InstitutionRepository] for the app.
      */
     val institutionRepository: InstitutionRepository =
-        InstitutionRepositoryImpl(institutionRemoteDataSource(), institutionLocalDataSource(context))
+        InstitutionRepositoryImpl(
+            institutionRemoteDataSource(),
+            institutionLocalDataSource(context),
+        )
 
     /**
      * Singleton [AuthRepository] for the app.

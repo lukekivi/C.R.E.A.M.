@@ -90,6 +90,9 @@ class InstitutionLocalDataSourceImpl internal constructor(
         itemId: String,
         cursor: String,
     ) {
-        dao.saveTransactionCursor(itemId, cursor)
+        dao.saveTransactionCursor(
+            itemId,
+            cursor,
+        )
     }
 }

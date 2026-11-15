@@ -54,7 +54,10 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("C.R.E.A.M.", style = MaterialTheme.typography.headlineLarge)
+        Text(
+            "C.R.E.A.M.",
+            style = MaterialTheme.typography.headlineLarge,
+        )
         Spacer(Modifier.height(32.dp))
 
         OutlinedTextField(
@@ -79,7 +82,12 @@ fun LoginScreen(
         Spacer(Modifier.height(24.dp))
 
         Button(
-            onClick = { viewModel.signInWithEmail(email, password) },
+            onClick = {
+                viewModel.signInWithEmail(
+                    email,
+                    password,
+                )
+            },
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -103,7 +111,10 @@ fun LoginScreen(
 
         uiState.errorMessage?.let { errorMessage ->
             Spacer(Modifier.height(12.dp))
-            Text(errorMessage, color = MaterialTheme.colorScheme.error)
+            Text(
+                errorMessage,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }

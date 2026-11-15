@@ -60,7 +60,10 @@ class LoginViewModel(
                 )
             }
             authRepository
-                .signInWithEmail(email, password)
+                .signInWithEmail(
+                    email,
+                    password,
+                )
                 .onSuccess { handleSignedIn() }
                 .onFailure(::handleFailure)
         }
@@ -94,7 +97,10 @@ class LoginViewModel(
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
                     .build()
-                val result = credentialManager.getCredential(context, request)
+                val result = credentialManager.getCredential(
+                    context,
+                    request,
+                )
                 val idToken = GoogleIdTokenCredential.createFrom(result.credential.data).idToken
                 authRepository
                     .signInWithGoogle(idToken)

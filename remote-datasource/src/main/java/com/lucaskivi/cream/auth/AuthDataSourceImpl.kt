@@ -40,7 +40,10 @@ class AuthDataSourceImpl internal constructor(
     ): NetworkResult<User> =
         catching {
             firebaseAuth
-                .signInWithEmailAndPassword(email, password)
+                .signInWithEmailAndPassword(
+                    email,
+                    password,
+                )
                 .await()
                 .user!!
                 .toDomainUser()
@@ -52,7 +55,10 @@ class AuthDataSourceImpl internal constructor(
     ): NetworkResult<User> =
         catching {
             firebaseAuth
-                .createUserWithEmailAndPassword(email, password)
+                .createUserWithEmailAndPassword(
+                    email,
+                    password,
+                )
                 .await()
                 .user!!
                 .toDomainUser()
@@ -62,7 +68,10 @@ class AuthDataSourceImpl internal constructor(
         idToken: String,
     ): NetworkResult<User> =
         catching {
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val credential = GoogleAuthProvider.getCredential(
+                idToken,
+                null,
+            )
             firebaseAuth
                 .signInWithCredential(credential)
                 .await()

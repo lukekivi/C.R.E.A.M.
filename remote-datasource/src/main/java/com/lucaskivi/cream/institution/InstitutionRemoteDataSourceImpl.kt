@@ -48,7 +48,10 @@ class InstitutionRemoteDataSourceImpl internal constructor(
                 .await()
                 .getData()
                 .asMap()
-            transformer.toLinkedInstitution(response, institutionId)
+            transformer.toLinkedInstitution(
+                response,
+                institutionId,
+            )
         }
 
     override suspend fun listInstitutions(): NetworkResult<List<LinkedInstitutionWithAccounts>> =
