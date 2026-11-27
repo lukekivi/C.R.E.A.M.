@@ -4,13 +4,9 @@ This file provides guidance to coding agents working in this repository.
 
 ## Architecture
 
-Three-layer architecture with manual dependency injection (no Hilt/Koin — dependencies are provided to ViewModels via factories):
+Three layers with manual dependency injection (no Hilt/Koin): UI (`:app`) → Data (`:data`, repositories + `AppContainer`) → Datasource (`:remote-datasource`, `:local-datasource`, each exposing one container of datasource interfaces). `:app` depends only on `:data`. Composables own their input types; see [ADR 0003](docs/decisions/0003-composables-own-their-data.md).
 
-- **UI layer** (`ui/`): Jetpack Compose screens and state holders (ViewModels, remembered objects). Adaptive layouts via Compose. Composables own their input types (`<Name>Data`); each screen's `<Screen>UiTransformer` maps domain models to them. See [ADR 0003](docs/decisions/0003-composables-own-their-data.md).
-- **Data layer**: Repositories containing business logic. One repository per data type.
-- **Datasource layer**: Split into `remote-datasource` (network) and `local-datasource` (storage) modules. Each module owns its interface, implementation, and a factory function returning the interface type. Consumers call the factory — never import impl classes directly. `:data` depends on these modules; `:app` only depends on `:data`.
-
-Data flows up: Datasource → Repository → ViewModel (via its UiTransformer) → Composable.
+Read [docs/architecture.md](docs/architecture.md) before adding a module, repository, datasource, or ViewModel. The `cream-viewmodel` skill has the ViewModel factory template.
 
 ## Code style
 

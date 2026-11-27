@@ -52,11 +52,11 @@ val myViewModel: MyViewModel = viewModel(
 
 If the ViewModel needs a repository that doesn't exist yet:
 
-1. Add the interface to `:data` (e.g., `data/auth/MyRepository.kt`)
-2. Add the implementation to `:data` (e.g., `data/auth/MyRepositoryImpl.kt`)
-3. If it needs a datasource, add the datasource interface to `:data` and the impl to `:remote-datasource` or `:local-datasource`
-4. Add the repository as a property on `AppContainer` (`data/di/AppContainer.kt`)
-5. Wire the datasource impl in `CreamApplication`
+1. If it needs a new datasource, add the interface and an impl with an `internal constructor` to `:remote-datasource` or `:local-datasource` (`<module>/.../<feature>/`). Expose it as a property on the module's container (`RemoteDataSources` / `LocalDataSources`), built in the container impl.
+2. Add the repository interface and impl to `:data` (`data/.../repository/<feature>/`). The impl takes datasource interfaces in its constructor.
+3. Add the repository as a property on `AppContainer` (`data/.../di/AppContainer.kt`), typed as the interface and built from the module containers' datasources.
+
+See "Dependency injection" in [docs/architecture.md](../../../docs/architecture.md).
 
 ## Key rules
 
