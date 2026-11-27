@@ -395,14 +395,20 @@ class InstitutionRemoteDataSourceImplTest {
 
 ## Module / layer boundaries
 
-Each module owns its implementation behind a factory function that returns the interface type. Consumers call the factory; they never import the impl class directly.
+A datasource module's only public entry point is its container: an interface with a property per datasource, and a factory function that builds it. Consumers use the container's properties; they never import an impl class.
 
 ```kotlin
 // in :remote-datasource
-fun authDataSource(): AuthDataSource = AuthDataSourceImpl.create()
+interface RemoteDataSources {
+    val auth: AuthDataSource
+    val institution: InstitutionRemoteDataSource
+}
+
+fun remoteDataSources(): RemoteDataSources =
+    RemoteDataSourcesImpl()
 ```
 
-`AppContainer` in `:data` wires impls by calling each module's factory. `:app` depends only on `:data`.
+Impls have an `internal constructor` and are built only in the module's container impl. `AppContainer` in `:data` builds each module's container once. `:app` depends only on `:data`. See [docs/architecture.md](docs/architecture.md).
 
 ## Transformers
 
@@ -410,7 +416,7 @@ fun authDataSource(): AuthDataSource = AuthDataSourceImpl.create()
 
 When a datasource impl converts raw payloads (callable responses, API bodies) into models, that conversion lives in a `<Feature>Transformer` class in the same package, e.g. `InstitutionTransformer`. Keeping it out of the impl makes the mapping testable and lets impl tests mock it.
 
-- The transformer is an `internal` class injected through the impl's constructor; the module's factory passes the real one.
+- The transformer is an `internal` class injected through the impl's constructor; the module's container passes the real one.
 - Impl tests mock the transformer. They verify what is sent to the backend, that the response is handed to the transformer, and that the transformer's result (or failure) is returned.
 - Outside datasource impls and screens, a conversion that nothing needs to mock can be a `private` or `internal` extension function in the file that uses it.
 - Helpers that aren't specific to one feature, such as casts, go in a neutral extensions file in the module (e.g. `com.lucaskivi.cream.remote.CastExtensions`), not in the transformer.

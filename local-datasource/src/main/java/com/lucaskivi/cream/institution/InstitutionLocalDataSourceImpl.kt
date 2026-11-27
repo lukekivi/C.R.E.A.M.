@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.map
 /**
  * Room-backed implementation of [InstitutionLocalDataSource].
  *
- * Instantiate via [institutionLocalDataSource]; the constructor is internal to prevent use
- * outside this module.
+ * Built by [com.lucaskivi.cream.local.LocalDataSources]; the constructor is internal to prevent
+ * use outside this module.
  *
  * @param dao DAO used to read from and write to the local database.
  * @param transformer Converts between domain models and database entities.
