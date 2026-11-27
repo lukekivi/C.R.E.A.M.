@@ -218,7 +218,9 @@ Change `mutableUiState` with `update { }`, not by assigning its `value`.
 
 ## Declarative UiState
 
-A `UiState` should describe what the screen shows, so the composable can render it directly. Use a sealed interface when the screen has distinct states (such as `Loading`, `Empty`, and `Loaded`); otherwise, plain properties are enough.
+A screen's ViewModel owns one `UiState`, the screen's master state. It describes what the screen shows: which content, dialog, and flags are present. Use a sealed interface when the screen has distinct states (such as `Loading`, `Empty`, and `Loaded`); otherwise, plain properties are enough.
+
+The `UiState` doesn't define how a component looks. Where it holds a component's input, it uses that composable's `*Data` type (see "Composable data"), built by the screen's UI transformer (see "UI transformers").
 
 ```kotlin
 data class FooUiState(
@@ -230,9 +232,44 @@ sealed interface FooContent {
     data object Loading : FooContent
     data object Empty : FooContent
     data class Loaded(
-        val items: List<Item>,
+        val items: List<FooItemData>,
     ) : FooContent
 }
+```
+
+## Composable data
+
+A composable owns the type that describes its input. The ViewModel never defines a component's shape.
+
+- A composable that takes structured data takes one `data: <Name>Data` parameter, named after the composable: `AccountItem` takes `AccountItemData`. Name composables as nouns (`AccountItem`, `ProfileSection`), not by layout (`AccountRow`).
+- The `*Data` type is declared in the composable's file, below the composable. A composable with a `*Data` type gets its own file, `<Name>.kt`, in the screen package. Private helpers it alone uses (e.g. `InstitutionHeader`) go in that file too.
+- Every composable that takes structured data gets a `*Data` type. No exceptions: two screens sharing a domain model must not share its shape. Primitives and lambdas stay plain parameters (`ErrorDialog(message, onDismiss)`).
+- A composable may take its children's `*Data` to pass down (`InstitutionList(institutions: List<InstitutionItemData>)`).
+- `*Data` fields hold display-ready values: formatted strings, flags, ids. A composable never formats, cases, or joins them.
+- Never build UI from a domain model. A `*Data` type (or the `UiState`) may carry a domain model only as a payload handed back through a callback, documented as such; the composable never reads its fields.
+- A list section that contributes several lazy entries (a header, one entry per child, a divider) is a `LazyListScope.<name>` extension taking `<Name>Data`, lowercase by Compose convention (`institutionItem` takes `InstitutionItemData`). It keeps each child its own lazy entry.
+
+```kotlin
+/**
+ * ...
+ */
+@Composable
+fun AccountItem(
+    data: AccountItemData,
+) {
+    ...
+}
+
+/**
+ * What an [AccountItem] shows.
+ * ...
+ */
+data class AccountItemData(
+    val accountId: String,
+    val name: String,
+    val details: String,
+    val balance: String,
+)
 ```
 
 ## Events
@@ -265,6 +302,8 @@ EventsEffect(viewModel.events) { event ->
 - A feature package holds behavior: interfaces, implementations, factories, composables.
 - Data types it exposes (data classes, enums, sealed types) go in its `model` subpackage.
 - A screen's `UiState` stays in the screen package, next to its ViewModel.
+- A composable's `*Data` type stays in the composable's file.
+- A screen's UI transformer stays in the screen package.
 
 ## Companion objects
 
@@ -356,20 +395,44 @@ class InstitutionRemoteDataSourceImplTest {
 
 ## Module / layer boundaries
 
-Each module owns its implementation behind a factory function that returns the interface type. Consumers call the factory; they never import the impl class directly.
+A datasource module's only public entry point is its container: an interface with a property per datasource, and a factory function that builds it. Consumers use the container's properties; they never import an impl class.
 
 ```kotlin
 // in :remote-datasource
-fun authDataSource(): AuthDataSource = AuthDataSourceImpl.create()
+interface RemoteDataSources {
+    val auth: AuthDataSource
+    val institution: InstitutionRemoteDataSource
+}
+
+fun remoteDataSources(): RemoteDataSources =
+    RemoteDataSourcesImpl()
 ```
 
-`AppContainer` in `:data` wires impls by calling each module's factory. `:app` depends only on `:data`.
+Impls have an `internal constructor` and are built only in the module's container impl. `AppContainer` in `:data` builds each module's container once. `:app` depends only on `:data`. See [docs/architecture.md](docs/architecture.md).
 
 ## Transformers
 
+### Datasource transformers
+
 When a datasource impl converts raw payloads (callable responses, API bodies) into models, that conversion lives in a `<Feature>Transformer` class in the same package, e.g. `InstitutionTransformer`. Keeping it out of the impl makes the mapping testable and lets impl tests mock it.
 
-- The transformer is an `internal` class injected through the impl's constructor; the module's factory passes the real one.
+- The transformer is an `internal` class injected through the impl's constructor; the module's container passes the real one.
 - Impl tests mock the transformer. They verify what is sent to the backend, that the response is handed to the transformer, and that the transformer's result (or failure) is returned.
-- Outside datasource impls, a conversion that nothing needs to mock can be a `private` or `internal` extension function in the file that uses it.
+- Outside datasource impls and screens, a conversion that nothing needs to mock can be a `private` or `internal` extension function in the file that uses it.
 - Helpers that aren't specific to one feature, such as casts, go in a neutral extensions file in the module (e.g. `com.lucaskivi.cream.remote.CastExtensions`), not in the transformer.
+
+### UI transformers
+
+Every conversion from a domain model to something a screen shows lives in the screen's `<Screen>UiTransformer`, e.g. `InstitutionsUiTransformer`. That covers composables' `*Data` and any `UiState` value derived from a domain model, such as a dialog naming an institution. The ViewModel orchestrates; it doesn't format. A screen that shows nothing derived from a domain model (e.g. Login) has no UI transformer.
+
+- The transformer is a class in the screen package, injected through the ViewModel's constructor. The ViewModel's factory constructs it, passing its own dependencies (e.g. `CurrencyFormatter`).
+- Methods are named `to<Target>`: `toAccountItemData(account)`, `toConfirmDisconnect(institution)`.
+- `<Screen>UiTransformerTest` covers the mapping and formatting. ViewModel tests mock the transformer and verify that domain models are handed to it and its results land in the `UiState`; they don't assert on formatted strings.
+- Composables never call the transformer.
+
+```kotlin
+class FooViewModel(
+    private val fooRepository: FooRepository,
+    private val uiTransformer: FooUiTransformer,
+) : ViewModel()
+```

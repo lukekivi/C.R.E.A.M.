@@ -25,6 +25,7 @@ class HomeViewModelTest {
 
     private val authRepository: AuthRepository = mockk()
     private val institutionRepository: InstitutionRepository = mockk()
+    private val uiTransformer: HomeUiTransformer = mockk()
     private lateinit var viewModel: HomeViewModel
 
     @BeforeEach
@@ -32,12 +33,13 @@ class HomeViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         every { authRepository.authStateFlow } returns emptyFlow()
         justRun { authRepository.signOut() }
+        every { uiTransformer.toProfileSectionData(null) } returns ProfileSectionData("?", "there")
         viewModel = createViewModel()
     }
 
     @AfterEach
     fun tearDown() {
-        confirmVerified(authRepository, institutionRepository)
+        confirmVerified(authRepository, institutionRepository, uiTransformer)
         Dispatchers.resetMain()
     }
 
@@ -54,6 +56,7 @@ class HomeViewModelTest {
 
             // Verify
             coVerify {
+                uiTransformer.toProfileSectionData(null)
                 authRepository.authStateFlow
                 institutionRepository.clearLocalCache()
                 authRepository.signOut()
@@ -71,6 +74,7 @@ class HomeViewModelTest {
 
             // Verify
             coVerify {
+                uiTransformer.toProfileSectionData(null)
                 authRepository.authStateFlow
                 institutionRepository.clearLocalCache()
                 authRepository.signOut()
@@ -82,5 +86,6 @@ class HomeViewModelTest {
         HomeViewModel(
             authRepository = authRepository,
             institutionRepository = institutionRepository,
+            uiTransformer = uiTransformer,
         )
 }

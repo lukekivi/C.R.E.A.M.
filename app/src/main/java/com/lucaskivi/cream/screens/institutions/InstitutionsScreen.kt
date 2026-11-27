@@ -4,28 +4,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,12 +29,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -128,7 +117,7 @@ fun InstitutionsScreen(
     when (val dialog = uiState.dialog) {
         is InstitutionsDialog.ConfirmDisconnect -> {
             DisconnectDialog(
-                institution = dialog.institution,
+                institutionName = dialog.institutionName,
                 onConfirm = viewModel::confirmDisconnect,
                 onDismiss = viewModel::dismissDialog,
             )
@@ -198,125 +187,26 @@ private fun EmptyState(
 }
 
 /**
- * Every linked institution as a header followed by its account rows.
+ * Every linked institution, each followed by its accounts.
  *
- * @param institutions The institutions to list.
+ * @param institutions What each institution shows.
  * @param onDisconnect Called when the user chooses to disconnect an institution.
  */
 @Composable
 private fun InstitutionList(
-    institutions: List<InstitutionItem>,
+    institutions: List<InstitutionItemData>,
     onDisconnect: (LinkedInstitution) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 88.dp),
     ) {
-        institutions.forEach { institutionItem ->
-            val institution = institutionItem.institution
-            item(key = institution.itemId) {
-                InstitutionHeader(
-                    institution = institution,
-                    onDisconnect = { onDisconnect(institution) },
-                )
-            }
-            items(
-                items = institutionItem.accounts,
-                key = { account -> account.accountId },
-            ) { account ->
-                AccountRow(account)
-            }
-            item(key = "${institution.itemId}-divider") {
-                HorizontalDivider()
-            }
-        }
-    }
-}
-
-/**
- * An institution's name and an overflow menu offering Disconnect.
- *
- * @param institution The institution to show.
- * @param onDisconnect Called when the user chooses Disconnect.
- */
-@Composable
-private fun InstitutionHeader(
-    institution: LinkedInstitution,
-    onDisconnect: () -> Unit,
-) {
-    var isMenuOpen by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 16.dp,
-                top = 16.dp,
-                bottom = 4.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = institution.institutionName,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f),
-        )
-        Box {
-            IconButton(onClick = { isMenuOpen = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options",
-                )
-            }
-            DropdownMenu(
-                expanded = isMenuOpen,
-                onDismissRequest = { isMenuOpen = false },
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Disconnect") },
-                    onClick = {
-                        isMenuOpen = false
-                        onDisconnect()
-                    },
-                )
-            }
-        }
-    }
-}
-
-/**
- * One account: its name, masked number and type, and its current balance. Not clickable.
- *
- * @param account The account to show.
- */
-@Composable
-private fun AccountRow(
-    account: AccountItem,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 8.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = account.name,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Text(
-                text = account.details,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        institutions.forEach { institution ->
+            institutionItem(
+                data = institution,
+                onDisconnect = onDisconnect,
             )
         }
-        Text(
-            text = account.balance,
-            style = MaterialTheme.typography.bodyLarge,
-        )
     }
 }
 
@@ -343,21 +233,21 @@ private fun ErrorDialog(
 }
 
 /**
- * Confirms disconnecting [institution].
+ * Confirms disconnecting the institution named [institutionName].
  *
- * @param institution The institution to disconnect.
+ * @param institutionName Name of the institution to disconnect.
  * @param onConfirm Called when the user confirms.
  * @param onDismiss Called when the user cancels or dismisses the dialog.
  */
 @Composable
 private fun DisconnectDialog(
-    institution: LinkedInstitution,
+    institutionName: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Disconnect ${institution.institutionName}?") },
+        title = { Text("Disconnect $institutionName?") },
         text = { Text("Its accounts and transactions will be removed from CREAM.") },
         confirmButton = {
             TextButton(onClick = onConfirm) {

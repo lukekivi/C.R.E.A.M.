@@ -47,7 +47,7 @@ abstract class CreamDatabase : RoomDatabase() {
          * @param context Used to locate the database file; the application context is always used
          *   internally regardless of what is passed.
          */
-        fun getInstance(
+        internal fun getInstance(
             context: Context,
         ): CreamDatabase =
             instance ?: synchronized(this) {
